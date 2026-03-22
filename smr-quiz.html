@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMR Quiz</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#050510;color:#e2e8f0;min-height:100vh}
+
+/* LOGIN */
+#login{position:fixed;inset:0;background:#050510;display:flex;justify-content:center;align-items:center;z-index:100;padding:20px}
+.box{background:#0f172a;border:2px solid #00f2ff;border-radius:16px;padding:36px;width:100%;max-width:420px}
+.box h1{color:#00f2ff;text-align:center;font-size:28px;margin-bottom:6px}
+.box p{color:#64748b;text-align:center;margin-bottom:24px;font-size:13px}
+.tabs{display:flex;background:#1e293b;border-radius:8px;padding:4px;margin-bottom:20px}
+.tab{flex:1;padding:10px;border:none;background:transparent;color:#64748b;cursor:pointer;border-radius:6px;font-size:13px;font-weight:bold}
+.tab.active{background:#00f2ff;color:#000}
+.form{display:none}.form.active{display:block}
+label{display:block;color:#94a3b8;font-size:12px;margin-bottom:4px;margin-top:14px}
+input{width:100%;padding:11px;background:#1e293b;border:1px solid #334155;border-radius:8px;color:#fff;font-size:14px}
+input:focus{outline:none;border-color:#00f2ff}
+.err{color:#ff0055;font-size:12px;margin-top:4px;display:none}
+.btn{width:100%;padding:13px;background:#00f2ff;color:#000;border:none;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer;margin-top:18px}
+.btn:hover{opacity:0.9}
+.link{text-align:center;margin-top:14px;font-size:13px;color:#64748b}
+.link span{color:#00f2ff;cursor:pointer}
+
+/* GAME */
+#game{display:none;min-height:100vh;flex-direction:column}
+.topbar{background:#0f172a;border-bottom:1px solid #1e293b;padding:14px 24px;display:flex;justify-content:space-between;align-items:center}
+.topbar h1{color:#00f2ff;font-size:20px}
+.top-stats{display:flex;gap:20px;align-items:center}
+.stat{text-align:center}
+.stat-l{font-size:10px;color:#64748b}
+.stat-v{font-size:18px;font-weight:bold;color:#fff}
+.btn-out{padding:8px 14px;background:transparent;border:1px solid #ff0055;color:#ff0055;border-radius:8px;cursor:pointer;font-size:13px}
+.nav{display:flex;gap:8px;padding:16px 24px;background:#080d1e;border-bottom:1px solid #1e293b}
+.ntab{padding:10px 20px;background:transparent;border:1px solid #1e293b;color:#64748b;border-radius:8px;cursor:pointer;font-size:13px;font-weight:bold}
+.ntab.active{background:#00f2ff;color:#000;border-color:#00f2ff}
+.content{padding:24px;flex:1}
+
+/* SECTIONS */
+.sec{display:none}.sec.active{display:block}
+.year-tabs{display:flex;gap:8px;margin-bottom:20px}
+.ytab{padding:9px 18px;background:#1e293b;border:none;color:#64748b;border-radius:8px;cursor:pointer;font-size:13px;font-weight:bold}
+.ytab.active{background:#00f2ff;color:#000}
+
+/* LEVEL CARDS */
+.subject{margin-bottom:28px}
+.subject h2{color:#fff;font-size:17px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #1e293b}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.card{background:#0f172a;border:1px solid #1e293b;border-radius:12px;padding:18px;transition:border-color .2s}
+.card:hover{border-color:#00f2ff}
+.card.locked{opacity:0.5}
+.card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.card-icon{font-size:26px}
+.diff{font-size:11px;font-weight:bold;padding:3px 8px;border-radius:6px}
+.card h3{font-size:14px;color:#fff;margin-bottom:4px}
+.card p{font-size:12px;color:#64748b;margin-bottom:12px}
+.card-foot{display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:10px}
+.ok{color:#00ff9d}.lock{color:#64748b}
+.btn-play{width:100%;padding:9px;background:#00ff9d;color:#000;border:none;border-radius:8px;font-size:13px;font-weight:bold;cursor:pointer}
+.btn-play:disabled{background:#1e293b;color:#475569;cursor:not-allowed}
+.btn-unlock{width:100%;padding:9px;background:transparent;color:#00f2ff;border:1px solid #00f2ff;border-radius:8px;font-size:13px;cursor:pointer}
+.btn-unlock:disabled{border-color:#334155;color:#475569;cursor:not-allowed}
+
+/* QUIZ */
+.quiz-wrap{max-width:700px;margin:0 auto}
+.qhdr{display:flex;justify-content:space-between;margin-bottom:16px}
+.qhdr span{font-size:14px;color:#94a3b8}
+.qhdr strong{color:#00f2ff}
+.timer-bar-bg{background:#1e293b;border-radius:4px;height:8px;margin-bottom:20px;overflow:hidden}
+.timer-bar{height:100%;background:#00f2ff;border-radius:4px;transition:width 1s linear}
+.question{background:#0f172a;border:1px solid #1e293b;border-radius:12px;padding:24px;margin-bottom:16px}
+.question p{font-size:18px;color:#fff;margin-bottom:16px;line-height:1.5}
+.answer{width:100%;padding:13px;background:#1e293b;border:2px solid #334155;border-radius:8px;color:#00f2ff;font-size:15px}
+.answer:focus{outline:none;border-color:#00f2ff}
+.feedback{padding:12px 16px;border-radius:8px;font-weight:bold;display:none;margin-bottom:12px;font-size:14px}
+.feedback.ok{background:rgba(0,255,157,.1);border:1px solid #00ff9d;color:#00ff9d;display:block}
+.feedback.er{background:rgba(255,0,85,.1);border:1px solid #ff0055;color:#ff0055;display:block}
+.feedback.to{background:rgba(255,0,85,.1);border:1px solid #ff0055;color:#ff0055;display:block}
+.qbtns{display:flex;gap:10px}
+.btn-back{padding:11px 20px;background:transparent;border:1px solid #334155;color:#94a3b8;border-radius:8px;cursor:pointer;font-size:13px}
+.btn-check{flex:1;padding:11px;background:#00f2ff;color:#000;border:none;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer}
+.btn-next{flex:1;padding:11px;background:#00ff9d;color:#000;border:none;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;display:none}
+
+/* RESULT */
+.result{background:#0f172a;border:1px solid #00ff9d;border-radius:12px;padding:30px;text-align:center;display:none}
+.result h2{color:#00ff9d;font-size:24px;margin-bottom:20px}
+.result-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.rs{background:#1e293b;border-radius:8px;padding:12px}
+.rs-l{font-size:11px;color:#64748b;margin-bottom:4px}
+.rs-v{font-size:20px;font-weight:bold;color:#fff}
+
+/* MINIGAMES */
+.mg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+.mg-card{background:#0f172a;border:2px solid #7000ff;border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s}
+.mg-card:hover{border-color:#00f2ff}
+.mg-card .ic{font-size:48px;margin-bottom:12px;display:block}
+.mg-card h3{color:#fff;font-size:18px;margin-bottom:8px}
+.mg-card p{color:#64748b;font-size:13px;margin-bottom:14px}
+.mg-rew{background:#7000ff;color:#fff;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:bold;display:inline-block;margin-bottom:14px}
+.btn-mg{width:100%;padding:11px;background:linear-gradient(135deg,#7000ff,#00f2ff);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer}
+
+/* NOTIFICATIONS */
+.notif{position:fixed;top:20px;right:20px;padding:12px 18px;border-radius:10px;font-size:14px;font-weight:bold;z-index:9999;animation:fin .3s ease}
+@keyframes fin{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.notif.ok{background:#0f172a;border:1px solid #00ff9d;color:#00ff9d}
+.notif.er{background:#0f172a;border:1px solid #ff0055;color:#ff0055}
+.notif.in{background:#0f172a;border:1px solid #00f2ff;color:#00f2ff}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .cards{grid-template-columns:1fr}
+  .mg-grid{grid-template-columns:1fr}
+  .top-stats{gap:10px}
+  .stat-v{font-size:15px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="box">
+    <h1>💻 SMR Quiz</h1>
+    <p>Sistemas Microinformáticos y Redes</p>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('login',this)">INICIAR SESIÓN</button>
+      <button class="tab" onclick="switchTab('register',this)">REGISTRARSE</button>
+    </div>
+
+    <div id="formLogin" class="form active">
+      <label>Usuario o Email</label>
+      <input type="text" id="lUser" placeholder="Tu usuario o email" autocomplete="username">
+      <div class="err" id="lErr"></div>
+      <label>Contraseña</label>
+      <input type="password" id="lPass" placeholder="Tu contraseña" autocomplete="current-password"
+             onkeydown="if(event.key==='Enter')doLogin()">
+      <div class="err" id="lPassErr"></div>
+      <button class="btn" onclick="doLogin()">ENTRAR</button>
+      <div class="link">¿Sin cuenta? <span onclick="switchTab('register',document.querySelectorAll('.tab')[1])">Regístrate</span></div>
+    </div>
+
+    <div id="formRegister" class="form">
+      <label>Nombre completo</label>
+      <input type="text" id="rName" placeholder="Tu nombre" autocomplete="name">
+      <div class="err" id="rNameErr"></div>
+      <label>Usuario</label>
+      <input type="text" id="rUser" placeholder="Nombre de usuario" autocomplete="username">
+      <div class="err" id="rUserErr"></div>
+      <label>Email</label>
+      <input type="email" id="rEmail" placeholder="tu@email.com" autocomplete="email">
+      <div class="err" id="rEmailErr"></div>
+      <label>Contraseña</label>
+      <input type="password" id="rPass" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+      <div class="err" id="rPassErr"></div>
+      <label>Confirmar contraseña</label>
+      <input type="password" id="rPass2" placeholder="Repite la contraseña" autocomplete="new-password"
+             onkeydown="if(event.key==='Enter')doRegister()">
+      <div class="err" id="rPass2Err"></div>
+      <button class="btn" onclick="doRegister()">CREAR CUENTA</button>
+      <div class="link">¿Ya tienes cuenta? <span onclick="switchTab('login',document.querySelectorAll('.tab')[0])">Inicia sesión</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="game">
+  <div class="topbar">
+    <h1>💻 SMR Quiz</h1>
+    <div class="top-stats">
+      <div class="stat"><div class="stat-l">PUNTOS</div><div class="stat-v" id="stPts">0</div></div>
+      <div class="stat"><div class="stat-l">MONEDAS</div><div class="stat-v" id="stCoins">0 💎</div></div>
+      <div class="stat"><div class="stat-l">NIVELES</div><div class="stat-v" id="stLvls">0/36</div></div>
+      <button class="btn-out" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="ntab active" onclick="showSec('levels',this)">📚 Niveles</button>
+    <button class="ntab" onclick="showSec('minigames',this)">🎮 Minijuegos</button>
+  </div>
+  <div class="content">
+    <!-- LEVELS -->
+    <div id="secLevels" class="sec active">
+      <div class="year-tabs">
+        <button class="ytab active" onclick="setYear('primero',this)">📚 1er Año</button>
+        <button class="ytab" onclick="setYear('segundo',this)">🎓 2º Año</button>
+      </div>
+      <div id="lvlContent"></div>
+    </div>
+
+    <!-- MINIGAMES -->
+    <div id="secMinigames" class="sec">
+      <div class="mg-grid">
+        <div class="mg-card">
+          <span class="ic">🔧</span>
+          <h3>Ensamblaje</h3>
+          <p>Identifica componentes de hardware en 60 segundos</p>
+          <div class="mg-rew">+20-60 💎</div>
+          <button class="btn-mg" onclick="startAsm()">JUGAR</button>
+        </div>
+        <div class="mg-card">
+          <span class="ic">🔗</span>
+          <h3>Relacionar Conceptos</h3>
+          <p>Empareja términos con sus definiciones</p>
+          <div class="mg-rew">+15-50 💎</div>
+          <button class="btn-mg" onclick="startMatch()">JUGAR</button>
+        </div>
+        <div class="mg-card">
+          <span class="ic">🔌</span>
+          <h3>Cableado RJ45</h3>
+          <p>Ordena cables según T568A y T568B</p>
+          <div class="mg-rew">+15-45 💎</div>
+          <button class="btn-mg" onclick="startCable()">JUGAR</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ -->
+    <div id="secQuiz" class="sec">
+      <div class="quiz-wrap">
+        <div class="qhdr">
+          <span>Pregunta <strong id="qNum">1</strong>/<strong id="qTotal">10</strong></span>
+          <span>+<strong id="qPts">0</strong> pts</span>
+          <span>⏱ <strong id="qTime">25</strong>s</span>
+        </div>
+        <div class="timer-bar-bg"><div class="timer-bar" id="timerBar"></div></div>
+        <div class="question">
+          <p id="qText"></p>
+          <input type="text" class="answer" id="answerInput" placeholder="Escribe tu respuesta..."
+                 autocomplete="off" onkeydown="if(event.key==='Enter')checkAnswer()">
+        </div>
+        <div class="feedback" id="feedback"></div>
+        <div class="qbtns">
+          <button class="btn-back" onclick="backToLevels()">← Volver</button>
+          <button class="btn-check" id="btnCheck" onclick="checkAnswer()">Verificar</button>
+          <button class="btn-next" id="btnNext" onclick="nextQuestion()">Siguiente →</button>
+        </div>
+        <div class="result" id="resultBox">
+          <h2>🏆 ¡Nivel Completado!</h2>
+          <div class="result-stats">
+            <div class="rs"><div class="rs-l">CORRECTAS</div><div class="rs-v" id="rCorr">-</div></div>
+            <div class="rs"><div class="rs-l">PUNTOS</div><div class="rs-v" id="rPts">-</div></div>
+            <div class="rs"><div class="rs-l">PRECISIÓN</div><div class="rs-v" id="rAcc">-</div></div>
+            <div class="rs"><div class="rs-l">MONEDAS</div><div class="rs-v" id="rCoins">-</div></div>
+          </div>
+          <button class="btn" onclick="backToLevels()">Volver al menú</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MINIGAME QUIZ (ensamblaje) -->
+    <div id="secAsm" class="sec">
+      <div class="quiz-wrap">
+        <div class="qhdr">
+          <span>Pregunta <strong id="aNum">1</strong>/5</span>
+          <span>⏱ <strong id="aTime">60</strong>s</span>
+          <span>💎 <strong id="aCoins">0</strong></span>
+        </div>
+        <div class="timer-bar-bg"><div class="timer-bar" id="aTimerBar"></div></div>
+        <div class="question">
+          <p style="font-size:40px;text-align:center;margin-bottom:10px" id="aIcon"></p>
+          <p style="text-align:center;color:#00f2ff;font-weight:bold;margin-bottom:16px" id="aTitle"></p>
+          <p id="aText"></p>
+        </div>
+        <div id="aOpts" style="display:grid;gap:10px;margin-bottom:14px"></div>
+        <div class="feedback" id="aFeedback"></div>
+        <div class="qbtns">
+          <button class="btn-back" onclick="backToLevels()">← Volver</button>
+          <button class="btn-check" id="aBtn" onclick="checkAsm()" disabled>Confirmar</button>
+          <button class="btn-next" id="aNext" onclick="nextAsm()">Siguiente →</button>
+        </div>
+        <div class="result" id="aResult">
+          <h2>🔧 Ensamblaje completado</h2>
+          <div class="result-stats">
+            <div class="rs"><div class="rs-l">CORRECTAS</div><div class="rs-v" id="arCorr">-</div></div>
+            <div class="rs"><div class="rs-l">MONEDAS</div><div class="rs-v" id="arCoins">-</div></div>
+          </div>
+          <button class="btn" onclick="backToLevels()">Volver al menú</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MATCHING GAME -->
+    <div id="secMatch" class="sec">
+      <div class="quiz-wrap">
+        <div class="qhdr">
+          <span>Relacionar conceptos</span>
+          <span>⏱ <strong id="mTime">90</strong>s</span>
+          <span>✅ <strong id="mCorr">0</strong>/5</span>
+        </div>
+        <div class="timer-bar-bg"><div class="timer-bar" id="mTimerBar"></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+          <div>
+            <h3 style="color:#00f2ff;margin-bottom:10px;font-size:13px">TÉRMINOS</h3>
+            <div id="matchTerms"></div>
+          </div>
+          <div>
+            <h3 style="color:#00f2ff;margin-bottom:10px;font-size:13px">DEFINICIONES</h3>
+            <div id="matchDefs"></div>
+          </div>
+        </div>
+        <div class="feedback" id="mFeedback"></div>
+        <button class="btn-back" onclick="backToLevels()">← Volver</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ===== STORAGE =====
+var S = {
+  get: function(k) { try { var v=localStorage.getItem(k); return v?JSON.parse(v):null; } catch(e) { return null; } },
+  set: function(k,v) { try { localStorage.setItem(k,JSON.stringify(v)); } catch(e) {} },
+  del: function(k) { try { localStorage.removeItem(k); } catch(e) {} }
+};
+
+// ===== DATA =====
+var SUBJECTS = {
+  primero: [
+    {id:'montaje', name:'Montaje y Mantenimiento', icon:'🔧'},
+    {id:'sistemas', name:'Sistemas Operativos', icon:'💻'},
+    {id:'ofimatica', name:'Ofimática', icon:'📊'},
+    {id:'redes', name:'Redes Locales', icon:'🌐'},
+    {id:'empleabilidad', name:'Empleabilidad I', icon:'👔'}
+  ],
+  segundo: [
+    {id:'sistemasred', name:'Sistemas en Red', icon:'🖥️'},
+    {id:'seguridad', name:'Seguridad Informática', icon:'🔒'},
+    {id:'servicios', name:'Servicios en Red', icon:'⚙️'},
+    {id:'web', name:'Aplicaciones Web', icon:'🌍'},
+    {id:'ingles', name:'Inglés Profesional', icon:'🇬🇧'},
+    {id:'empleabilidad2', name:'Empleabilidad II', icon:'👨‍💼'},
+    {id:'proyecto', name:'Proyecto', icon:'📋'}
+  ]
+};
+
+var LEVELS = {
+  montaje_facil:   {title:'Fácil',   cost:0,   color:'#10b981', year:'primero', subj:'Montaje'},
+  montaje_medio:   {title:'Medio',   cost:100, color:'#f59e0b', year:'primero', subj:'Montaje'},
+  montaje_dificil: {title:'Difícil', cost:300, color:'#ef4444', year:'primero', subj:'Montaje'},
+  sistemas_facil:   {title:'Fácil',   cost:0,   color:'#10b981', year:'primero', subj:'Sistemas OS'},
+  sistemas_medio:   {title:'Medio',   cost:100, color:'#f59e0b', year:'primero', subj:'Sistemas OS'},
+  sistemas_dificil: {title:'Difícil', cost:300, color:'#ef4444', year:'primero', subj:'Sistemas OS'},
+  ofimatica_facil:   {title:'Fácil',   cost:0,   color:'#10b981', year:'primero', subj:'Ofimática'},
+  ofimatica_medio:   {title:'Medio',   cost:100, color:'#f59e0b', year:'primero', subj:'Ofimática'},
+  ofimatica_dificil: {title:'Difícil', cost:300, color:'#ef4444', year:'primero', subj:'Ofimática'},
+  redes_facil:   {title:'Fácil',   cost:0,   color:'#10b981', year:'primero', subj:'Redes'},
+  redes_medio:   {title:'Medio',   cost:100, color:'#f59e0b', year:'primero', subj:'Redes'},
+  redes_dificil: {title:'Difícil', cost:300, color:'#ef4444', year:'primero', subj:'Redes'},
+  empleabilidad_facil:   {title:'Fácil',   cost:0,   color:'#10b981', year:'primero', subj:'Empleabilidad I'},
+  empleabilidad_medio:   {title:'Medio',   cost:100, color:'#f59e0b', year:'primero', subj:'Empleabilidad I'},
+  empleabilidad_dificil: {title:'Difícil', cost:300, color:'#ef4444', year:'primero', subj:'Empleabilidad I'},
+  sistemasred_facil:   {title:'Fácil',   cost:0,   color:'#10b981', year:'segundo', subj:'Sistemas en Red'},
+  sistemasred_medio:   {title:'Medio',   cost:150, color:'#f59e0b', year:'segundo', subj:'Sistemas en Red'},
+  sistemasred_dificil: {title:'Difícil', cost:350, color:'#ef4444', year:'segundo', subj:'Sistemas en Red'},
+  seguridad_facil:   {title:'Fácil',   cost:0,   color:'#10b981', year:'segundo', subj:'Seguridad'},
+  seguridad_medio:   {title:'Medio',   cost:150, color:'#f59e0b', year:'segundo', subj:'Seguridad'},
+  seguridad_dificil: {title:'Difícil', cost:350, color:'#ef4444', year:'segundo', subj:'Seguridad'},
+  servicios_facil:   {title:'Fácil',   cost:0,   color:'#10b981', year:'segundo', subj:'Servicios'},
+  servicios_medio:   {title:'Medio',   cost:150, color:'#f59e0b', year:'segundo', subj:'Servicios'},
+  servicios_dificil: {title:'Difícil', cost:350, color:'#ef4444', year:'segundo', subj:'Servicios'},
+  web_facil:   {title:'Fácil',   cost:0,   color:'#10b981', year:'segundo', subj:'Web'},
+  web_medio:   {title:'Medio',   cost:150, color:'#f59e0b', year:'segundo', subj:'Web'},
+  web_dificil: {title:'Difícil', cost:350, color:'#ef4444', year:'segundo', subj:'Web'},
+  ingles_facil:   {title:'Fácil',   cost:0,   color:'#10b981', year:'segundo', subj:'Inglés'},
+  ingles_medio:   {title:'Medio',   cost:150, color:'#f59e0b', year:'segundo', subj:'Inglés'},
+  ingles_dificil: {title:'Difícil', cost:350, color:'#ef4444', year:'segundo', subj:'Inglés'},
+  empleabilidad2_facil:   {title:'Fácil',   cost:0,   color:'#10b981', year:'segundo', subj:'Empleabilidad II'},
+  empleabilidad2_medio:   {title:'Medio',   cost:150, color:'#f59e0b', year:'segundo', subj:'Empleabilidad II'},
+  empleabilidad2_dificil: {title:'Difícil', cost:350, color:'#ef4444', year:'segundo', subj:'Empleabilidad II'},
+  proyecto_facil:   {title:'Fácil',   cost:0,   color:'#10b981', year:'segundo', subj:'Proyecto'},
+  proyecto_medio:   {title:'Medio',   cost:150, color:'#f59e0b', year:'segundo', subj:'Proyecto'},
+  proyecto_dificil: {title:'Difícil', cost:350, color:'#ef4444', year:'segundo', subj:'Proyecto'}
+};
+
+var QS = {
+  montaje_facil: [
+    {q:'¿Qué componente es el cerebro del ordenador?', a:['cpu','procesador'], pts:10},
+    {q:'¿Qué tipo de memoria es volátil?', a:['ram'], pts:10},
+    {q:'¿Qué pasta se aplica entre CPU y disipador?', a:['pasta termica','pasta térmica'], pts:10},
+    {q:'¿Qué herramienta evita descargas electrostáticas?', a:['pulsera antiestatica','pulsera antiestática'], pts:10},
+    {q:'¿Qué componente convierte corriente alterna en continua?', a:['fuente de alimentacion','fuente de alimentación'], pts:10},
+    {q:'¿Qué ranura usan las tarjetas gráficas modernas?', a:['pci express','pcie'], pts:10},
+    {q:'¿Qué significa BIOS?', a:['basic input output system'], pts:10},
+    {q:'¿Qué cable conecta discos duros a la placa?', a:['sata'], pts:10},
+    {q:'¿Qué dispositivo almacena datos permanentemente?', a:['disco duro','hdd','ssd'], pts:10},
+    {q:'¿Qué conector usa monitores HD?', a:['hdmi','displayport'], pts:10}
+  ],
+  montaje_medio: [
+    {q:'¿Cuántos pines tiene el conector ATX moderno?', a:['24'], pts:15},
+    {q:'¿Qué formato de partición soporta discos mayores de 2TB?', a:['gpt'], pts:15},
+    {q:'¿Qué herramienta crimpa cables de red?', a:['crimpadora'], pts:15},
+    {q:'¿Qué programa comprueba la memoria RAM?', a:['memtest86','memtest'], pts:15},
+    {q:'¿Qué batería mantiene la config de la BIOS?', a:['pila cmos','cmos'], pts:15},
+    {q:'¿Qué significa SATA?', a:['serial ata'], pts:15},
+    {q:'¿Qué es el overclocking?', a:['aumentar la velocidad del procesador'], pts:15},
+    {q:'¿Qué tecnología Intel permite virtualización?', a:['vt-x'], pts:15},
+    {q:'¿Qué interfaz usan los SSD de alta velocidad?', a:['nvme','m.2'], pts:15},
+    {q:'¿Qué mide un multímetro?', a:['tension corriente resistencia','voltaje'], pts:15}
+  ],
+  montaje_dificil: [
+    {q:'¿Qué RAID es mirroring puro?', a:['raid 1'], pts:20},
+    {q:'¿Qué tecnología overclockea la RAM automáticamente?', a:['xmp'], pts:20},
+    {q:'¿Qué socket usa AMD Ryzen 5000?', a:['am4'], pts:20},
+    {q:'¿Qué es el throttling en una CPU?', a:['reduccion de velocidad por temperatura'], pts:20},
+    {q:'¿Qué es un POST?', a:['power on self test'], pts:20},
+    {q:'¿Qué programa hace test de estrés a la GPU?', a:['furmark'], pts:20},
+    {q:'¿Qué versión PCIe ofrece 16 GT/s por carril?', a:['pcie 4.0'], pts:20},
+    {q:'¿Qué es la refrigeración líquida?', a:['sistema de refrigeracion con liquido'], pts:20},
+    {q:'¿Qué significa ESD?', a:['electrostatic discharge','descarga electrostatica'], pts:20},
+    {q:'¿Qué es el factor de forma ATX?', a:['estandar de tamaño de placa base'], pts:20}
+  ],
+  sistemas_facil: [
+    {q:'¿Qué SO de Microsoft es el más reciente?', a:['windows 11'], pts:10},
+    {q:'¿Qué comando muestra la IP en Windows?', a:['ipconfig'], pts:10},
+    {q:'¿Qué sistema de archivos usa Windows?', a:['ntfs'], pts:10},
+    {q:'¿Qué comando lista directorios en Linux?', a:['ls'], pts:10},
+    {q:'¿Qué gestor de arranque usa Linux?', a:['grub'], pts:10},
+    {q:'¿Qué atajo copia en Windows?', a:['ctrl c'], pts:10},
+    {q:'¿Qué comando limpia la pantalla en Linux?', a:['clear'], pts:10},
+    {q:'¿Qué SO libre está basado en Unix?', a:['linux'], pts:10},
+    {q:'¿Qué extensión tienen los scripts de PowerShell?', a:['.ps1'], pts:10},
+    {q:'¿Qué comando muestra procesos en Windows?', a:['tasklist'], pts:10}
+  ],
+  sistemas_medio: [
+    {q:'¿Qué comando muestra procesos en Linux?', a:['ps','top'], pts:15},
+    {q:'¿Qué herramienta repara el sistema de archivos en Windows?', a:['chkdsk'], pts:15},
+    {q:'¿Qué comando cambia permisos en Linux?', a:['chmod'], pts:15},
+    {q:'¿Qué sistema de archivos usa Linux?', a:['ext4'], pts:15},
+    {q:'¿Qué herramienta ve eventos en Windows?', a:['visor de eventos'], pts:15},
+    {q:'¿Qué comando muestra espacio en disco en Linux?', a:['df'], pts:15},
+    {q:'¿Qué comando reinicia Windows por CMD?', a:['shutdown /r'], pts:15},
+    {q:'¿Qué comando crea un directorio en Linux?', a:['mkdir'], pts:15},
+    {q:'¿Qué variable contiene las rutas de ejecutables?', a:['path'], pts:15},
+    {q:'¿Qué comando comprueba integridad en Windows?', a:['sfc /scannow'], pts:15}
+  ],
+  sistemas_dificil: [
+    {q:'¿Qué comando sincroniza directorios en Linux?', a:['rsync'], pts:20},
+    {q:'¿Qué es el kernel?', a:['nucleo del sistema operativo'], pts:20},
+    {q:'¿Qué fichero de Linux contiene los usuarios?', a:['/etc/passwd'], pts:20},
+    {q:'¿Qué demonio gestiona logs en Linux?', a:['syslog','rsyslog'], pts:20},
+    {q:'¿Qué modo de Windows carga solo drivers esenciales?', a:['modo seguro'], pts:20},
+    {q:'¿Qué comando modifica la tabla de particiones?', a:['fdisk','parted'], pts:20},
+    {q:'¿Qué herramienta monitoriza rendimiento en Windows?', a:['perfmon','performance monitor'], pts:20},
+    {q:'¿Qué comando muestra la ruta hasta un host?', a:['tracert','traceroute'], pts:20},
+    {q:'¿Qué es una máquina virtual?', a:['emulacion de un ordenador dentro de otro'], pts:20},
+    {q:'¿Qué fichero de Linux define los grupos?', a:['/etc/group'], pts:20}
+  ],
+  redes_facil: [
+    {q:'¿Qué topología conecta todos a un punto central?', a:['estrella'], pts:10},
+    {q:'¿Qué dispositivo conecta equipos en LAN?', a:['switch'], pts:10},
+    {q:'¿Qué protocolo asigna IP automáticamente?', a:['dhcp'], pts:10},
+    {q:'¿Qué herramienta prueba conectividad?', a:['ping'], pts:10},
+    {q:'¿Qué máscara tiene una red clase C?', a:['255.255.255.0'], pts:10},
+    {q:'¿Qué dispositivo separa redes?', a:['router'], pts:10},
+    {q:'¿Qué servicio traduce nombres a IP?', a:['dns'], pts:10},
+    {q:'¿Qué puerto usa HTTP?', a:['80'], pts:10},
+    {q:'¿Qué puerto usa HTTPS?', a:['443'], pts:10},
+    {q:'¿Qué es la dirección IP de loopback?', a:['127.0.0.1'], pts:10}
+  ],
+  redes_medio: [
+    {q:'¿Qué capa OSI maneja el enrutamiento IP?', a:['capa 3','red'], pts:15},
+    {q:'¿Qué protocolo previene bucles en capa 2?', a:['stp'], pts:15},
+    {q:'¿Qué comando muestra la tabla ARP?', a:['arp -a'], pts:15},
+    {q:'¿Qué estándar define Ethernet?', a:['ieee 802.3'], pts:15},
+    {q:'¿Qué protocolo resuelve IPs a MACs?', a:['arp'], pts:15},
+    {q:'¿Qué herramienta analiza el tráfico de red?', a:['wireshark'], pts:15},
+    {q:'¿Qué máscara en CIDR es /24?', a:['255.255.255.0'], pts:15},
+    {q:'¿Qué significa VLAN?', a:['virtual local area network'], pts:15},
+    {q:'¿Qué tipo de IPv6 equivale a 127.0.0.1?', a:['::1'], pts:15},
+    {q:'¿Qué es el protocolo ICMP?', a:['internet control message protocol'], pts:15}
+  ],
+  redes_dificil: [
+    {q:'¿Qué NAT traduce múltiples IPs con un solo puerto?', a:['pat'], pts:20},
+    {q:'¿Qué versión mejorada de STP converge más rápido?', a:['rstp'], pts:20},
+    {q:'¿Qué tecnología agrega múltiples enlaces físicos?', a:['etherchannel','lacp'], pts:20},
+    {q:'¿Qué protocolo autentica dispositivos por puerto?', a:['802.1x'], pts:20},
+    {q:'¿Qué protocolo de enrutamiento usa métricas compuestas?', a:['eigrp'], pts:20},
+    {q:'¿Qué es el protocolo BGP?', a:['border gateway protocol'], pts:20},
+    {q:'¿Qué es una red DMZ?', a:['zona desmilitarizada'], pts:20},
+    {q:'¿Qué protocolo cifra la gestión de equipos de red?', a:['ssh'], pts:20},
+    {q:'¿Qué es el protocolo OSPF?', a:['open shortest path first'], pts:20},
+    {q:'¿Qué es QoS?', a:['quality of service','calidad de servicio'], pts:20}
+  ],
+  ofimatica_facil: [
+    {q:'¿Qué programa de Microsoft es para hojas de cálculo?', a:['excel'], pts:10},
+    {q:'¿Qué programa se usa para presentaciones?', a:['powerpoint'], pts:10},
+    {q:'¿Qué programa procesa textos en Microsoft?', a:['word'], pts:10},
+    {q:'¿Qué atajo guarda un documento?', a:['ctrl s'], pts:10},
+    {q:'¿Qué función de Excel suma celdas?', a:['sum','suma'], pts:10},
+    {q:'¿Qué alternativa gratuita a Office existe?', a:['libreoffice'], pts:10},
+    {q:'¿Qué extensión tienen documentos de Word?', a:['.docx'], pts:10},
+    {q:'¿Qué atajo imprime?', a:['ctrl p'], pts:10},
+    {q:'¿Qué significa PDF?', a:['portable document format'], pts:10},
+    {q:'¿Qué programa gestiona correo en Microsoft?', a:['outlook'], pts:10}
+  ],
+  ofimatica_medio: [
+    {q:'¿Qué función de Excel busca valores en tablas?', a:['vlookup','buscarv'], pts:15},
+    {q:'¿Qué función condicional tiene Excel?', a:['if','si'], pts:15},
+    {q:'¿Qué función cuenta celdas no vacías?', a:['counta','contara'], pts:15},
+    {q:'¿Cómo se escribe una referencia absoluta en Excel?', a:['$a$1'], pts:15},
+    {q:'¿Qué herramienta fusiona documentos con datos?', a:['combinar correspondencia'], pts:15},
+    {q:'¿Qué función devuelve la fecha actual en Excel?', a:['today','hoy'], pts:15},
+    {q:'¿Qué extensión es una presentación de solo lectura?', a:['.ppsx'], pts:15},
+    {q:'¿Qué herramienta revisa la ortografía en Word?', a:['revision','f7'], pts:15},
+    {q:'¿Qué tipo de referencia no cambia al copiar?', a:['absoluta'], pts:15},
+    {q:'¿Qué función combina texto en Excel?', a:['concatenate','concat','concatenar'], pts:15}
+  ],
+  ofimatica_dificil: [
+    {q:'¿Qué lenguaje programa macros en Office?', a:['vba'], pts:20},
+    {q:'¿Qué herramienta de Excel analiza datos avanzados?', a:['tabla dinamica'], pts:20},
+    {q:'¿Qué formato usa la base de datos Access?', a:['.accdb'], pts:20},
+    {q:'¿Qué función extrae texto del centro de una cadena?', a:['mid'], pts:20},
+    {q:'¿Qué herramienta de Word compara dos documentos?', a:['comparar'], pts:20},
+    {q:'¿Qué complemento crea diagramas en Office?', a:['smartart'], pts:20},
+    {q:'¿Qué función combina INDEX y MATCH?', a:['index match'], pts:20},
+    {q:'¿Qué significa CSV?', a:['comma separated values'], pts:20},
+    {q:'¿Qué protege un documento de edición en Word?', a:['restringir edicion'], pts:20},
+    {q:'¿Qué es una macro en Office?', a:['secuencia de instrucciones automatizadas'], pts:20}
+  ],
+  empleabilidad_facil: [
+    {q:'¿Qué documento presenta tus habilidades?', a:['curriculum','cv'], pts:10},
+    {q:'¿Qué red social profesional es la más usada?', a:['linkedin'], pts:10},
+    {q:'¿Qué carta acompaña al CV?', a:['carta de presentacion'], pts:10},
+    {q:'¿Qué organismo gestiona el desempleo en España?', a:['sepe'], pts:10},
+    {q:'¿Qué significa ETT?', a:['empresa de trabajo temporal'], pts:10},
+    {q:'¿Qué es el networking?', a:['red de contactos profesionales'], pts:10},
+    {q:'¿Qué habilidad es trabajar bien en equipo?', a:['teamwork','trabajo en equipo'], pts:10},
+    {q:'¿Qué tipo de empleo es trabajar por cuenta propia?', a:['autonomo'], pts:10},
+    {q:'¿Qué es una entrevista de trabajo?', a:['proceso de seleccion de personal'], pts:10},
+    {q:'¿Qué significa PRL?', a:['prevencion de riesgos laborales'], pts:10}
+  ],
+  empleabilidad_medio: [
+    {q:'¿Qué técnica busca empleo activamente?', a:['busqueda activa de empleo'], pts:15},
+    {q:'¿Qué tipo de contrato no tiene fecha de fin?', a:['contrato indefinido'], pts:15},
+    {q:'¿Qué herramienta analiza fortalezas y debilidades?', a:['dafo','foda'], pts:15},
+    {q:'¿Qué actitud es adaptarse a los cambios?', a:['flexibilidad','adaptabilidad'], pts:15},
+    {q:'¿Qué competencia es gestionar bien el tiempo?', a:['gestion del tiempo'], pts:15},
+    {q:'¿Qué es el plan de carrera?', a:['planificacion de objetivos profesionales'], pts:15},
+    {q:'¿Qué habilidad es comunicarse efectivamente?', a:['comunicacion'], pts:15},
+    {q:'¿Qué tipo de entrevista tiene varias personas?', a:['entrevista grupal','entrevista colectiva'], pts:15},
+    {q:'¿Qué significa upskilling?', a:['mejora de habilidades actuales'], pts:15},
+    {q:'¿Qué es el teletrabajo?', a:['trabajo a distancia mediante tecnologia'], pts:15}
+  ],
+  empleabilidad_dificil: [
+    {q:'¿Qué método STAR se usa en entrevistas?', a:['situacion tarea accion resultado'], pts:20},
+    {q:'¿Qué es el employer branding?', a:['marca empleadora'], pts:20},
+    {q:'¿Qué es la inteligencia emocional?', a:['capacidad de gestionar emociones'], pts:20},
+    {q:'¿Qué es la negociación colectiva?', a:['dialogo entre empresa y sindicatos'], pts:20},
+    {q:'¿Qué es un ERTE?', a:['expediente de regulacion temporal de empleo'], pts:20},
+    {q:'¿Qué es el mentoring?', a:['guia de un profesional experto'], pts:20},
+    {q:'¿Qué es la resiliencia?', a:['capacidad de recuperarse ante adversidades'], pts:20},
+    {q:'¿Qué técnica de productividad usa intervalos de 25 min?', a:['tecnica pomodoro'], pts:20},
+    {q:'¿Qué es el liderazgo?', a:['capacidad de guiar e inspirar equipos'], pts:20},
+    {q:'¿Qué es el coaching?', a:['proceso de desarrollo personal y profesional'], pts:20}
+  ],
+  sistemasred_facil: [
+    {q:'¿Qué SO para servidores hace Microsoft?', a:['windows server'], pts:10},
+    {q:'¿Qué protocolo de autenticación usa Active Directory?', a:['kerberos'], pts:10},
+    {q:'¿Qué servicio comparte archivos en red Windows?', a:['smb','compartir archivos'], pts:10},
+    {q:'¿Qué distribución Linux es popular para servidores?', a:['ubuntu server','debian','centos'], pts:10},
+    {q:'¿Qué comando muestra el nombre del equipo?', a:['hostname'], pts:10},
+    {q:'¿Qué protocolo asigna IPs en Windows Server?', a:['dhcp'], pts:10},
+    {q:'¿Qué protocolo resuelve nombres en la red?', a:['dns'], pts:10},
+    {q:'¿Qué herramienta administra usuarios en AD?', a:['aduc','usuarios y equipos de active directory'], pts:10},
+    {q:'¿Qué significa AD?', a:['active directory'], pts:10},
+    {q:'¿Qué es un controlador de dominio?', a:['servidor que gestiona active directory'], pts:10}
+  ],
+  sistemasred_medio: [
+    {q:'¿Qué comando actualiza paquetes en Ubuntu?', a:['apt update'], pts:15},
+    {q:'¿Qué puerto usa LDAP?', a:['389'], pts:15},
+    {q:'¿Qué fichero de Linux contiene la config DNS?', a:['/etc/resolv.conf'], pts:15},
+    {q:'¿Qué protocolo sincroniza la hora en AD?', a:['ntp'], pts:15},
+    {q:'¿Qué rol convierte un servidor en controlador de dominio?', a:['adds','active directory domain services'], pts:15},
+    {q:'¿Qué herramienta administra el servidor remotamente?', a:['rdp','escritorio remoto'], pts:15},
+    {q:'¿Qué fichero de Linux define los grupos?', a:['/etc/group'], pts:15},
+    {q:'¿Qué GPO aplica config a todos los usuarios?', a:['default domain policy'], pts:15},
+    {q:'¿Qué comando instala paquetes en Ubuntu?', a:['apt install'], pts:15},
+    {q:'¿Qué muestra el comando top en Linux?', a:['procesos activos'], pts:15}
+  ],
+  sistemasred_dificil: [
+    {q:'¿Qué es un bosque en Active Directory?', a:['conjunto de dominios con esquema comun'], pts:20},
+    {q:'¿Qué es el Global Catalog en AD?', a:['replica con todos los objetos del bosque'], pts:20},
+    {q:'¿Qué comando PowerShell crea un usuario en AD?', a:['new-aduser'], pts:20},
+    {q:'¿Qué puerto usa LDAP cifrado?', a:['636'], pts:20},
+    {q:'¿Qué es un snapshot en virtualización?', a:['instantanea del estado de la maquina'], pts:20},
+    {q:'¿Qué es DFS en Windows Server?', a:['sistema de archivos distribuido'], pts:20},
+    {q:'¿Qué comando lista usuarios en AD con PowerShell?', a:['get-aduser'], pts:20},
+    {q:'¿Qué es un trust entre dominios?', a:['relacion de confianza entre dominios'], pts:20},
+    {q:'¿Qué es Hyper-V?', a:['hipervisor de microsoft'], pts:20},
+    {q:'¿Qué es una OU en Active Directory?', a:['unidad organizativa'], pts:20}
+  ],
+  seguridad_facil: [
+    {q:'¿Qué malware se propaga automáticamente?', a:['gusano','worm'], pts:10},
+    {q:'¿Qué técnica usa emails falsos para robar datos?', a:['phishing'], pts:10},
+    {q:'¿Qué dispositivo filtra el tráfico?', a:['firewall','cortafuegos'], pts:10},
+    {q:'¿Qué protocolo cifra el tráfico web?', a:['https'], pts:10},
+    {q:'¿Qué ataque satura un servidor?', a:['ddos'], pts:10},
+    {q:'¿Qué es un backup?', a:['copia de seguridad'], pts:10},
+    {q:'¿Qué es el malware?', a:['software malicioso'], pts:10},
+    {q:'¿Qué ataque intercepta comunicaciones?', a:['man in the middle'], pts:10},
+    {q:'¿Qué es un antivirus?', a:['software que detecta y elimina virus'], pts:10},
+    {q:'¿Qué es el ransomware?', a:['malware que cifra archivos y pide rescate'], pts:10}
+  ],
+  seguridad_medio: [
+    {q:'¿Qué algoritmo de cifrado simétrico es más común?', a:['aes'], pts:15},
+    {q:'¿Qué es un honeypot?', a:['sistema senuelo para detectar atacantes'], pts:15},
+    {q:'¿Qué estándar inalámbrico es más seguro?', a:['wpa3','wpa2'], pts:15},
+    {q:'¿Qué ataque inyecta código en bases de datos?', a:['sql injection'], pts:15},
+    {q:'¿Qué es la autenticación de dos factores?', a:['2fa'], pts:15},
+    {q:'¿Qué es un IDS?', a:['sistema de deteccion de intrusiones'], pts:15},
+    {q:'¿Qué es el cifrado asimétrico?', a:['usa clave publica y privada'], pts:15},
+    {q:'¿Qué herramienta analiza paquetes de red?', a:['wireshark'], pts:15},
+    {q:'¿Qué es el principio de mínimo privilegio?', a:['dar solo los permisos necesarios'], pts:15},
+    {q:'¿Qué es un certificado digital?', a:['documento que vincula identidad con clave publica'], pts:15}
+  ],
+  seguridad_dificil: [
+    {q:'¿Qué es un rootkit?', a:['malware que oculta su presencia'], pts:20},
+    {q:'¿Qué ataque prueba todas las combinaciones?', a:['fuerza bruta'], pts:20},
+    {q:'¿Qué es el pentesting?', a:['prueba de penetracion o hacking etico'], pts:20},
+    {q:'¿Qué es la ingeniería social?', a:['manipular personas para obtener informacion'], pts:20},
+    {q:'¿Qué protocolo seguro usa administración remota?', a:['ssh'], pts:20},
+    {q:'¿Qué es un firewall stateful?', a:['analiza el estado de las conexiones'], pts:20},
+    {q:'¿Qué es un ataque de replay?', a:['reenvio de datos validos interceptados'], pts:20},
+    {q:'¿Qué es OWASP?', a:['proyecto de seguridad de aplicaciones web'], pts:20},
+    {q:'¿Qué es un zero-day?', a:['vulnerabilidad no conocida ni parcheada'], pts:20},
+    {q:'¿Quién emite los certificados digitales?', a:['autoridad de certificacion','ca'], pts:20}
+  ],
+  servicios_facil: [
+    {q:'¿Qué servicio web usa el puerto 80?', a:['http'], pts:10},
+    {q:'¿Qué protocolo envía correo electrónico?', a:['smtp'], pts:10},
+    {q:'¿Qué servicio transfiere archivos?', a:['ftp'], pts:10},
+    {q:'¿Qué protocolo descarga correos al cliente?', a:['pop3'], pts:10},
+    {q:'¿Qué protocolo mantiene correos en el servidor?', a:['imap'], pts:10},
+    {q:'¿Qué servidor web usa Windows Server?', a:['iis'], pts:10},
+    {q:'¿Qué permite el acceso remoto al escritorio?', a:['rdp'], pts:10},
+    {q:'¿Qué servicio asigna IPs automáticamente?', a:['dhcp'], pts:10},
+    {q:'¿Qué servicio traduce nombres a IP?', a:['dns'], pts:10},
+    {q:'¿Qué puerto usa HTTPS?', a:['443'], pts:10}
+  ],
+  servicios_medio: [
+    {q:'¿Qué comando inicia un servicio en Linux?', a:['systemctl start'], pts:15},
+    {q:'¿Qué servidor web open source es el más popular?', a:['apache'], pts:15},
+    {q:'¿Qué protocolo consulta directorios?', a:['ldap'], pts:15},
+    {q:'¿Qué zona DNS tiene los registros de correo?', a:['mx'], pts:15},
+    {q:'¿Qué registro DNS apunta a otro nombre?', a:['cname'], pts:15},
+    {q:'¿Qué comando verifica la resolución DNS?', a:['nslookup','dig'], pts:15},
+    {q:'¿Qué es un servidor proxy?', a:['intermediario entre cliente e internet'], pts:15},
+    {q:'¿Qué directiva de Apache define sitios virtuales?', a:['virtualhost'], pts:15},
+    {q:'¿Qué es Nginx?', a:['servidor web y proxy inverso'], pts:15},
+    {q:'¿Qué hace el servicio NTP?', a:['sincroniza la hora'], pts:15}
+  ],
+  servicios_dificil: [
+    {q:'¿Qué es un balanceador de carga?', a:['distribuye trafico entre servidores'], pts:20},
+    {q:'¿Qué es un proxy inverso?', a:['proxy que protege servidores internos'], pts:20},
+    {q:'¿Qué es DNSSEC?', a:['extension que anade seguridad al dns'], pts:20},
+    {q:'¿Qué es el protocolo RADIUS?', a:['autenticacion para acceso a redes'], pts:20},
+    {q:'¿Qué es un CDN?', a:['red de distribucion de contenidos'], pts:20},
+    {q:'¿Qué es la virtualización de servidores?', a:['ejecutar varios servidores en uno fisico'], pts:20},
+    {q:'¿Qué es un cluster de alta disponibilidad?', a:['servidores que se sustituyen si uno falla'], pts:20},
+    {q:'¿Diferencia entre zona primaria y secundaria DNS?', a:['primaria editable, secundaria copia de solo lectura'], pts:20},
+    {q:'¿Qué reserva DHCP permite?', a:['asignar siempre la misma ip por mac'], pts:20},
+    {q:'¿Qué es Docker?', a:['plataforma de contenedores'], pts:20}
+  ],
+  web_facil: [
+    {q:'¿Qué lenguaje define la estructura de una web?', a:['html'], pts:10},
+    {q:'¿Qué lenguaje define el estilo visual?', a:['css'], pts:10},
+    {q:'¿Qué lenguaje es el principal del frontend?', a:['javascript'], pts:10},
+    {q:'¿Qué etiqueta HTML crea un enlace?', a:['a'], pts:10},
+    {q:'¿Qué etiqueta HTML muestra una imagen?', a:['img'], pts:10},
+    {q:'¿Qué CMS es más popular para blogs?', a:['wordpress'], pts:10},
+    {q:'¿Qué extensión tienen los ficheros JavaScript?', a:['.js'], pts:10},
+    {q:'¿Qué etiqueta HTML crea un párrafo?', a:['p'], pts:10},
+    {q:'¿Qué significa HTML?', a:['hypertext markup language'], pts:10},
+    {q:'¿Qué significa CSS?', a:['cascading style sheets'], pts:10}
+  ],
+  web_medio: [
+    {q:'¿Qué framework JavaScript creó Google?', a:['angular'], pts:15},
+    {q:'¿Qué librería simplifica el DOM?', a:['jquery'], pts:15},
+    {q:'¿Qué base de datos se usa con PHP?', a:['mysql'], pts:15},
+    {q:'¿Qué método HTTP envía datos de un formulario?', a:['post'], pts:15},
+    {q:'¿Qué significa API?', a:['application programming interface'], pts:15},
+    {q:'¿Qué framework CSS es popular para responsive?', a:['bootstrap'], pts:15},
+    {q:'¿Qué tipo de diseño se adapta a cualquier pantalla?', a:['responsive'], pts:15},
+    {q:'¿Qué es React?', a:['libreria de javascript para interfaces'], pts:15},
+    {q:'¿Qué lenguaje de servidor es más común en web?', a:['php'], pts:15},
+    {q:'¿Qué función de JavaScript muestra un diálogo?', a:['alert'], pts:15}
+  ],
+  web_dificil: [
+    {q:'¿Qué es una SPA?', a:['single page application'], pts:20},
+    {q:'¿Qué formato usan las APIs REST?', a:['json'], pts:20},
+    {q:'¿Qué permite comunicación en tiempo real?', a:['websockets'], pts:20},
+    {q:'¿Qué framework CSS usa clases de utilidad?', a:['tailwind'], pts:20},
+    {q:'¿Qué ataque inyecta scripts maliciosos?', a:['xss','cross site scripting'], pts:20},
+    {q:'¿Qué es el SSR?', a:['server side rendering'], pts:20},
+    {q:'¿Qué es CORS?', a:['cross origin resource sharing'], pts:20},
+    {q:'¿Qué es un JWT?', a:['json web token'], pts:20},
+    {q:'¿Qué es el DOM?', a:['document object model'], pts:20},
+    {q:'¿Qué es GraphQL?', a:['lenguaje de consulta para apis'], pts:20}
+  ],
+  ingles_facil: [
+    {q:'¿Cómo se dice "ordenador" en inglés?', a:['computer'], pts:10},
+    {q:'¿Cómo se dice "ratón" en inglés?', a:['mouse'], pts:10},
+    {q:'¿Cómo se dice "teclado" en inglés?', a:['keyboard'], pts:10},
+    {q:'¿Cómo se dice "pantalla" en inglés?', a:['screen','monitor'], pts:10},
+    {q:'¿Cómo se dice "red" en inglés?', a:['network'], pts:10},
+    {q:'¿Cómo se dice "archivo" en inglés?', a:['file'], pts:10},
+    {q:'¿Cómo se dice "carpeta" en inglés?', a:['folder'], pts:10},
+    {q:'¿Cómo se dice "contraseña" en inglés?', a:['password'], pts:10},
+    {q:'¿Cómo se dice "disco duro" en inglés?', a:['hard drive','hard disk'], pts:10},
+    {q:'¿Cómo se dice "imprimir" en inglés?', a:['print'], pts:10}
+  ],
+  ingles_medio: [
+    {q:'¿Cómo se dice "configuración" en inglés?', a:['configuration','settings'], pts:15},
+    {q:'¿Cómo se dice "soporte técnico" en inglés?', a:['technical support'], pts:15},
+    {q:'¿Cómo se dice "actualización" en inglés?', a:['update'], pts:15},
+    {q:'¿Cómo se dice "instalación" en inglés?', a:['installation','setup'], pts:15},
+    {q:'¿Cómo se dice "copia de seguridad" en inglés?', a:['backup'], pts:15},
+    {q:'¿Cómo se dice "cortafuegos" en inglés?', a:['firewall'], pts:15},
+    {q:'¿Cómo se dice "almacenamiento" en inglés?', a:['storage'], pts:15},
+    {q:'¿Cómo se dice "red inalámbrica" en inglés?', a:['wireless network','wifi'], pts:15},
+    {q:'¿Cómo se dice "usuario" en inglés?', a:['user'], pts:15},
+    {q:'¿Cómo se dice "ancho de banda" en inglés?', a:['bandwidth'], pts:15}
+  ],
+  ingles_dificil: [
+    {q:'¿Cómo se dice "solución de problemas" en inglés?', a:['troubleshooting'], pts:20},
+    {q:'¿Cómo se dice "virtualización" en inglés?', a:['virtualization'], pts:20},
+    {q:'¿Cómo se dice "infraestructura" en inglés?', a:['infrastructure'], pts:20},
+    {q:'¿Cómo se dice "escalabilidad" en inglés?', a:['scalability'], pts:20},
+    {q:'¿Cómo se dice "ciberseguridad" en inglés?', a:['cybersecurity'], pts:20},
+    {q:'¿Cómo se dice "rendimiento" en inglés?', a:['performance'], pts:20},
+    {q:'¿Cómo se dice "mantenimiento preventivo" en inglés?', a:['preventive maintenance'], pts:20},
+    {q:'¿Cómo se dice "interfaz de usuario" en inglés?', a:['user interface'], pts:20},
+    {q:'¿Cómo se dice "almacenamiento en la nube" en inglés?', a:['cloud storage'], pts:20},
+    {q:'¿Cómo se dice "experiencia de usuario" en inglés?', a:['user experience','ux'], pts:20}
+  ],
+  empleabilidad2_facil: [
+    {q:'¿Qué documento recoge derechos y deberes del trabajador?', a:['contrato de trabajo'], pts:10},
+    {q:'¿Qué contrato tiene duración determinada?', a:['contrato temporal'], pts:10},
+    {q:'¿Qué organismo gestiona el desempleo?', a:['sepe'], pts:10},
+    {q:'¿Qué cobra el trabajador cada mes?', a:['nomina'], pts:10},
+    {q:'¿Qué jornada es de 40 horas semanales?', a:['jornada completa'], pts:10},
+    {q:'¿Qué es el SMI?', a:['salario minimo interprofesional'], pts:10},
+    {q:'¿Qué es una baja médica?', a:['incapacidad temporal'], pts:10},
+    {q:'¿Qué es el finiquito?', a:['pago al finalizar el contrato'], pts:10},
+    {q:'¿Qué es la seguridad social?', a:['sistema de proteccion social'], pts:10},
+    {q:'¿Qué es un convenio colectivo?', a:['acuerdo que regula condiciones laborales'], pts:10}
+  ],
+  empleabilidad2_medio: [
+    {q:'¿Qué contrato fomenta la contratación de jóvenes?', a:['contrato en practicas'], pts:15},
+    {q:'¿Qué es un ERTE?', a:['expediente de regulacion temporal de empleo'], pts:15},
+    {q:'¿Qué es el despido disciplinario?', a:['despido por falta grave del trabajador'], pts:15},
+    {q:'¿Qué es la conciliación laboral?', a:['equilibrio entre vida profesional y personal'], pts:15},
+    {q:'¿Qué es la base de cotización?', a:['cantidad para calcular cotizaciones'], pts:15},
+    {q:'¿Qué es el teletrabajo?', a:['trabajo a distancia mediante tecnologia'], pts:15},
+    {q:'¿Qué porcentaje del salario puede ser en especie?', a:['30%'], pts:15},
+    {q:'¿Qué es el período de prueba?', a:['tiempo inicial para evaluar al trabajador'], pts:15},
+    {q:'¿Qué es un plan de igualdad?', a:['medidas para igualdad de trato en la empresa'], pts:15},
+    {q:'¿Qué es la negociación colectiva?', a:['dialogo entre empresa y sindicatos'], pts:15}
+  ],
+  empleabilidad2_dificil: [
+    {q:'¿Diferencia entre autónomo y asalariado?', a:['autonomo cuenta propia, asalariado cuenta ajena'], pts:20},
+    {q:'¿Qué es el upskilling?', a:['mejora de habilidades del trabajador'], pts:20},
+    {q:'¿Qué cubre el cese de actividad del autónomo?', a:['prestacion por fin de actividad'], pts:20},
+    {q:'¿Qué es la evaluación de desempeño?', a:['revision del rendimiento del trabajador'], pts:20},
+    {q:'¿Qué es un headhunter?', a:['cazatalentos o reclutador especializado'], pts:20},
+    {q:'¿Qué es el employer branding laboral?', a:['imagen de la empresa como empleadora'], pts:20},
+    {q:'¿Qué es la inteligencia emocional en el trabajo?', a:['gestionar emociones en entorno laboral'], pts:20},
+    {q:'¿Qué es el síndrome de burnout?', a:['agotamiento laboral extremo'], pts:20},
+    {q:'¿Qué es la movilidad funcional?', a:['cambio de funciones dentro de la empresa'], pts:20},
+    {q:'¿Qué es un ERE?', a:['expediente de regulacion de empleo'], pts:20}
+  ],
+  proyecto_facil: [
+    {q:'¿Qué documento describe el alcance del proyecto?', a:['acta de proyecto'], pts:10},
+    {q:'¿Qué herramienta visual representa tareas en el tiempo?', a:['diagrama de gantt'], pts:10},
+    {q:'¿Qué reunión marca el inicio del proyecto?', a:['kickoff'], pts:10},
+    {q:'¿Qué rol lidera el equipo de proyecto?', a:['jefe de proyecto','project manager'], pts:10},
+    {q:'¿Qué es un entregable?', a:['producto o resultado del proyecto'], pts:10},
+    {q:'¿Qué es un hito en un proyecto?', a:['evento importante del proyecto'], pts:10},
+    {q:'¿Qué es la EDT?', a:['estructura de desglose del trabajo'], pts:10},
+    {q:'¿Qué fase define los recursos necesarios?', a:['planificacion'], pts:10},
+    {q:'¿Qué es un stakeholder?', a:['persona interesada en el proyecto'], pts:10},
+    {q:'¿Qué tipo de proyecto tiene fecha de inicio y fin?', a:['proyecto temporal'], pts:10}
+  ],
+  proyecto_medio: [
+    {q:'¿Qué metodología ágil usa sprints?', a:['scrum'], pts:15},
+    {q:'¿Qué herramienta registra incidencias y tareas?', a:['jira','trello'], pts:15},
+    {q:'¿Qué documento evalúa la viabilidad del proyecto?', a:['estudio de viabilidad'], pts:15},
+    {q:'¿Qué técnica prioriza requisitos en ágil?', a:['moscow'], pts:15},
+    {q:'¿Qué es el alcance del proyecto?', a:['trabajo que se debe realizar'], pts:15},
+    {q:'¿Qué fase verifica que el producto cumple requisitos?', a:['pruebas','testing'], pts:15},
+    {q:'¿Qué es la gestión del riesgo?', a:['identificar y gestionar riesgos'], pts:15},
+    {q:'¿Qué metodología sigue un orden secuencial?', a:['waterfall','cascada'], pts:15},
+    {q:'¿Qué recoge el informe de cierre?', a:['lecciones aprendidas'], pts:15},
+    {q:'¿Qué es Kanban?', a:['metodo de gestion visual del trabajo'], pts:15}
+  ],
+  proyecto_dificil: [
+    {q:'¿Qué certificación existe para jefes de proyecto?', a:['pmp','prince2'], pts:20},
+    {q:'¿Qué técnica usa estimaciones optimista y pesimista?', a:['pert'], pts:20},
+    {q:'¿Qué es el valor ganado?', a:['tecnica para medir el desempeno del proyecto'], pts:20},
+    {q:'¿Qué es la ruta crítica?', a:['secuencia que determina la duracion total'], pts:20},
+    {q:'¿Diferencia entre proyecto y operación continua?', a:['proyecto temporal, operacion continua'], pts:20},
+    {q:'¿Qué es un plan de contingencia?', a:['plan ante riesgos identificados'], pts:20},
+    {q:'¿Qué es el acta de cierre?', a:['documento que finaliza el proyecto'], pts:20},
+    {q:'¿Qué es un OKR?', a:['objectives and key results'], pts:20},
+    {q:'¿Qué es el backlog en Scrum?', a:['lista priorizada de requisitos'], pts:20},
+    {q:'¿Qué rol gestiona el backlog?', a:['product owner'], pts:20}
+  ]
+};
+
+var ASM_QS = [
+  {icon:'🖥️', title:'CPU', q:'¿Cuál es la función principal de la CPU?',
+   opts:['Procesar instrucciones y controlar el sistema','Almacenar datos permanentemente','Renderizar gráficos','Gestionar la memoria RAM'],
+   cor:0, coins:15, exp:'La CPU ejecuta instrucciones y coordina el sistema.'},
+  {icon:'💾', title:'RAM', q:'¿Qué característica define a la RAM?',
+   opts:['Es volátil, pierde datos al apagar','Almacena datos permanentemente','Solo la usa la GPU','Guarda el sistema operativo'],
+   cor:0, coins:12, exp:'La RAM es volátil y almacena datos temporalmente.'},
+  {icon:'🛡️', title:'Pulsera antiestática', q:'¿Para qué se usa?',
+   opts:['Proteger de descargas electrostáticas','Medir temperatura','Iluminar el gabinete','Limpiar el polvo'],
+   cor:0, coins:8, exp:'Descarga la electricidad estática para proteger componentes.'},
+  {icon:'🔌', title:'Cable SATA', q:'¿Qué conecta principalmente?',
+   opts:['Discos duros y SSDs','Tarjetas gráficas','Ventiladores','Fuente de alimentación'],
+   cor:0, coins:10, exp:'SATA conecta la placa base con dispositivos de almacenamiento.'},
+  {icon:'🔊', title:'Pitido POST', q:'¿Qué indica un pitido largo y continuo?',
+   opts:['Problema con la RAM','Error en GPU','CPU no detectada','Teclado desconectado'],
+   cor:0, coins:15, exp:'Un pitido largo continuo indica fallo en la memoria RAM.'}
+];
+
+var MATCH_QS = [
+  {t:'CPU', d:'Ejecuta instrucciones y controla todos los componentes del sistema.'},
+  {t:'RAM', d:'Memoria volátil y rápida que almacena datos temporales de la CPU.'},
+  {t:'SSD', d:'Unidad de almacenamiento no volátil basada en memoria flash.'},
+  {t:'Fuente de Alimentación', d:'Convierte corriente alterna en corriente continua para el PC.'},
+  {t:'Placa Base', d:'Tarjeta principal que conecta todos los componentes entre sí.'}
+];
+
+// ===== GAME STATE =====
+var GS = null, CU = null;
+
+function freshState() {
+  var unlocked = Object.keys(LEVELS).filter(function(k){return LEVELS[k].cost===0;});
+  return {
+    pts:0, coins:0, year:'primero',
+    unlocked: unlocked, done: [],
+    qTimer:null, timerSecs:25
+  };
+}
+
+// ===== USERS =====
+var UK='smrq2_users', SK='smrq2_sess';
+function getUsers(){return S.get(UK)||[];}
+function saveUsers(u){S.set(UK,u);}
+function hash(p){var h=5381;for(var i=0;i<p.length;i++)h=((h<<5)+h)^p.charCodeAt(i);return(h>>>0).toString(36);}
+
+function regUser(name,user,email,pw){
+  var us=getUsers();
+  if(us.find(function(u){return u.user===user.toLowerCase();})) return {ok:false,f:'rUserErr',m:'Usuario ya existe'};
+  if(us.find(function(u){return u.email===email.toLowerCase();})) return {ok:false,f:'rEmailErr',m:'Email ya registrado'};
+  var u={id:''+Date.now(),name:name,user:user.toLowerCase(),email:email.toLowerCase(),pw:hash(pw),state:freshState()};
+  us.push(u); saveUsers(us); return {ok:true,user:u};
+}
+function loginUser(id,pw){
+  var us=getUsers();
+  var u=us.find(function(u){return u.user===id.toLowerCase()||u.email===id.toLowerCase();});
+  if(!u) return {ok:false,f:'lErr',m:'Usuario o contraseña incorrectos'};
+  if(u.pw!==hash(pw)) return {ok:false,f:'lPassErr',m:'Contraseña incorrecta'};
+  if(!u.state) u.state=freshState();
+  saveUsers(us);
+  return {ok:true,user:u};
+}
+function saveSess(){
+  if(!CU) return;
+  var us=getUsers(), i=us.findIndex(function(u){return u.id===CU.id;});
+  if(i>=0){us[i]=CU;saveUsers(us);}
+  S.set(SK,CU.id);
+}
+function loadSess(){
+  var id=S.get(SK); if(!id) return false;
+  var us=getUsers();
+  var u=us.find(function(u){return u.id===id;});
+  if(!u) return false;
+  if(!u.state) u.state=freshState();
+  CU=u; GS=u.state; return true;
+}
+
+// ===== UTILS =====
+function $(id){return document.getElementById(id);}
+function show(id){var e=$(id);if(e){e.style.display='';e.classList.add('active');}}
+function hide(id){var e=$(id);if(e){e.style.display='none';e.classList.remove('active');}}
+function notify(msg,t){
+  var n=document.createElement('div');
+  n.className='notif '+(t||'in');
+  n.textContent=msg;
+  document.body.appendChild(n);
+  setTimeout(function(){n.style.animation='fin .3s ease reverse';setTimeout(function(){n.remove();},300);},3500);
+}
+function shuffle(a){var r=[...a];for(var i=r.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=r[i];r[i]=r[j];r[j]=tmp;}return r;}
+function showErr(id,msg){var e=$(id);if(e){e.textContent=msg;e.style.display='block';}}
+function clearErrs(){document.querySelectorAll('.err').forEach(function(e){e.style.display='none';e.textContent='';});}
+
+// ===== AUTH UI =====
+window.switchTab = function(tab, btn) {
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  $('formLogin').classList.toggle('active', tab==='login');
+  $('formRegister').classList.toggle('active', tab==='register');
+  clearErrs();
+};
+
+window.doLogin = function() {
+  clearErrs();
+  var id=$('lUser').value.trim(), pw=$('lPass').value;
+  if(!id){showErr('lErr','Introduce tu usuario o email');return;}
+  if(!pw){showErr('lPassErr','Introduce tu contraseña');return;}
+  var r=loginUser(id,pw);
+  if(r.ok) startGame(r.user);
+  else showErr(r.f, r.m);
+};
+
+window.doRegister = function() {
+  clearErrs();
+  var name=$('rName').value.trim(), user=$('rUser').value.trim(),
+      email=$('rEmail').value.trim(), pw=$('rPass').value, pw2=$('rPass2').value;
+  var ok=true;
+  if(name.length<3){showErr('rNameErr','Mínimo 3 caracteres');ok=false;}
+  if(user.length<3){showErr('rUserErr','Mínimo 3 caracteres');ok=false;}
+  else if(!/^[a-zA-Z0-9_]+$/.test(user)){showErr('rUserErr','Solo letras, números y _');ok=false;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showErr('rEmailErr','Email no válido');ok=false;}
+  if(pw.length<6){showErr('rPassErr','Mínimo 6 caracteres');ok=false;}
+  if(pw!==pw2){showErr('rPass2Err','Las contraseñas no coinciden');ok=false;}
+  if(!ok) return;
+  var r=regUser(name,user,email,pw);
+  if(r.ok){startGame(r.user);notify('¡Bienvenido '+name+'!','ok');}
+  else showErr(r.f, r.m);
+};
+
+window.doLogout = function() {
+  if(!confirm('¿Cerrar sesión?')) return;
+  saveSess(); CU=null; GS=null; S.del(SK);
+  $('game').style.display='none';
+  $('login').style.display='flex';
+};
+
+// ===== GAME =====
+function startGame(user) {
+  CU=user; GS=user.state;
+  if(!GS){GS=freshState();CU.state=GS;}
+  saveSess();
+  $('login').style.display='none';
+  $('game').style.display='flex';
+  updateStats();
+  setYear(GS.year, document.querySelectorAll('.ytab')[GS.year==='segundo'?1:0]);
+}
+
+function updateStats(){
+  if(!GS) return;
+  $('stPts').textContent=GS.pts;
+  $('stCoins').textContent=GS.coins+' 💎';
+  $('stLvls').textContent=GS.done.length+'/36';
+}
+
+window.showSec = function(sec, btn) {
+  document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.ntab').forEach(function(t){t.classList.remove('active');});
+  $(('sec'+sec.charAt(0).toUpperCase()+sec.slice(1))).classList.add('active');
+  btn.classList.add('active');
+};
+
+window.setYear = function(year, btn) {
+  if(!GS) return;
+  GS.year=year;
+  document.querySelectorAll('.ytab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  renderLevels();
+};
+
+function renderLevels(){
+  if(!GS) return;
+  var cont=$('lvlContent'); cont.innerHTML='';
+  var subjs=SUBJECTS[GS.year];
+  subjs.forEach(function(s){
+    var keys=Object.keys(LEVELS).filter(function(k){return k.startsWith(s.id)&&LEVELS[k].year===GS.year;});
+    var div=document.createElement('div'); div.className='subject';
+    div.innerHTML='<h2>'+s.icon+' '+s.name+'</h2>';
+    var grid=document.createElement('div'); grid.className='cards';
+    keys.forEach(function(k){grid.appendChild(makeCard(k));});
+    div.appendChild(grid); cont.appendChild(div);
+  });
+}
+
+function makeCard(k){
+  var c=LEVELS[k];
+  var ul=GS.unlocked.indexOf(k)>=0;
+  var done=GS.done.indexOf(k)>=0;
+  var hasQ=QS[k]&&QS[k].length>0;
+  var dc={'Fácil':'#10b981','Medio':'#f59e0b','Difícil':'#ef4444'}[c.title]||'#94a3b8';
+  var div=document.createElement('div');
+  div.className='card'+(ul?'':' locked');
+  div.innerHTML='<div class="card-top"><div class="card-icon">'+SUBJECTS[GS.year].find(function(s){return k.startsWith(s.id);}).icon+'</div>'
+    +'<span class="diff" style="background:'+dc+'33;color:'+dc+'">'+c.title+'</span></div>'
+    +'<h3>'+c.subj+'</h3>'
+    +'<p>'+(hasQ?QS[k].length+' preguntas':'Próximamente')+'</p>'
+    +'<div class="card-foot"><span>'+(done?'<span class="ok">✓ Completado</span>':'Pendiente')+'</span>'
+    +(ul?'':'<span class="lock">🔒 '+c.cost+' pts</span>')+'</div>';
+  if(ul && hasQ){
+    var b=document.createElement('button');b.className='btn-play';b.textContent='▶ Jugar';
+    b.addEventListener('click', function(){startLevel(k);}); div.appendChild(b);
+  } else if(!ul){
+    var b=document.createElement('button');b.className='btn-unlock';b.textContent='Desbloquear ('+c.cost+' pts)';
+    b.disabled=GS.pts<c.cost;
+    b.addEventListener('click', function(){unlockLevel(k);}); div.appendChild(b);
+  }
+  return div;
+}
+
+function unlockLevel(k){
+  if(!GS) return;
+  var cost=LEVELS[k].cost;
+  if(GS.pts>=cost){
+    GS.pts-=cost; GS.unlocked.push(k);
+    saveSess(); updateStats(); renderLevels();
+    notify('¡Nivel desbloqueado!','ok');
+  } else notify('Necesitas '+cost+' puntos','er');
+}
+
+// ===== QUIZ =====
+var CQ={level:null, qs:[], idx:0, correct:0, timer:null, timeLeft:25};
+
+function startLevel(k){
+  if(!GS) return;
+  CQ.level=k; CQ.qs=shuffle([...QS[k]]); CQ.idx=0; CQ.correct=0;
+  document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
+  $('secQuiz').classList.add('active');
+  $('resultBox').style.display='none';
+  document.querySelectorAll('.qbtns,.question,.timer-bar-bg,.qhdr').forEach(function(el){el.style.display='';});
+  loadQuestion();
+}
+
+function loadQuestion(){
+  var q=CQ.qs[CQ.idx];
+  $('qNum').textContent=CQ.idx+1;
+  $('qTotal').textContent=CQ.qs.length;
+  $('qPts').textContent=q.pts;
+  $('qText').textContent=q.q;
+  $('answerInput').value=''; $('answerInput').disabled=false;
+  $('feedback').className='feedback'; $('feedback').textContent='';
+  $('btnCheck').style.display=''; $('btnNext').style.display='none';
+  startTimer();
+  setTimeout(function(){$('answerInput').focus();},50);
+}
+
+function startTimer(){
+  if(CQ.timer) clearInterval(CQ.timer);
+  CQ.timeLeft=GS.timerSecs;
+  updateTimer();
+  CQ.timer=setInterval(function(){
+    CQ.timeLeft--;
+    updateTimer();
+    if(CQ.timeLeft<=0){clearInterval(CQ.timer);timeUp();}
+  },1000);
+}
+function updateTimer(){
+  $('qTime').textContent=CQ.timeLeft;
+  $('timerBar').style.width=((CQ.timeLeft/GS.timerSecs)*100)+'%';
+  $('timerBar').style.background=CQ.timeLeft<=10?'#ff0055':CQ.timeLeft<=15?'#f59e0b':'#00f2ff';
+}
+function timeUp(){
+  GS.timerSecs=25; // reset
+  var q=CQ.qs[CQ.idx];
+  $('feedback').className='feedback to';
+  $('feedback').textContent='⏰ ¡Tiempo! Respuesta: '+q.a[0];
+  $('answerInput').disabled=true;
+  $('btnCheck').style.display='none'; $('btnNext').style.display='';
+}
+
+window.checkAnswer = function(){
+  if(CQ.timer) clearInterval(CQ.timer);
+  var q=CQ.qs[CQ.idx];
+  var ua=$('answerInput').value.trim().toLowerCase();
+  function norm(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();}
+  var ok=q.a.some(function(a){return norm(a)===norm(ua)||norm(ua).includes(norm(a));});
+  if(ok){
+    CQ.correct++;
+    $('feedback').className='feedback ok';
+    $('feedback').textContent='✅ ¡Correcto! +'+q.pts+' puntos';
+  } else {
+    $('feedback').className='feedback er';
+    $('feedback').textContent='❌ Incorrecto. Respuesta: '+q.a[0];
+  }
+  $('answerInput').disabled=true;
+  $('btnCheck').style.display='none'; $('btnNext').style.display='';
+};
+
+window.nextQuestion = function(){
+  CQ.idx++;
+  if(CQ.idx>=CQ.qs.length) finishQuiz();
+  else loadQuestion();
+};
+
+function finishQuiz(){
+  if(CQ.timer) clearInterval(CQ.timer);
+  var total=CQ.qs.length, corr=CQ.correct;
+  var pts=corr*(CQ.qs[0]?CQ.qs[0].pts:10);
+  var coins=Math.floor(pts/5);
+  GS.pts+=pts; GS.coins+=coins;
+  if(GS.done.indexOf(CQ.level)<0) GS.done.push(CQ.level);
+  $('rCorr').textContent=corr+'/'+total;
+  $('rPts').textContent='+'+pts;
+  $('rAcc').textContent=Math.round((corr/total)*100)+'%';
+  $('rCoins').textContent='+'+coins+' 💎';
+  document.querySelectorAll('.qbtns,.question,.timer-bar-bg,.qhdr').forEach(function(el){el.style.display='none';});
+  $('resultBox').style.display='block';
+  updateStats(); saveSess();
+  notify('¡Completado! +'+pts+' pts y +'+coins+' 💎','ok');
+}
+
+window.backToLevels = function(){
+  if(CQ.timer) clearInterval(CQ.timer);
+  if(asmTimer) clearInterval(asmTimer);
+  if(matchTimer) clearInterval(matchTimer);
+  document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
+  $('secLevels').classList.add('active');
+  document.querySelectorAll('.ntab').forEach(function(t,i){t.classList.toggle('active',i===0);});
+  renderLevels(); updateStats();
+};
+
+// ===== ENSAMBLAJE =====
+var asmIdx=0, asmCoins=0, asmCorr=0, asmTimer=null, asmSel=null;
+
+window.startAsm = function(){
+  asmIdx=0; asmCoins=0; asmCorr=0; asmSel=null;
+  document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
+  $('secAsm').classList.add('active');
+  $('aResult').style.display='none';
+  loadAsm();
+  var t=60;
+  $('aTime').textContent=t;
+  $('aTimerBar').style.width='100%';
+  if(asmTimer) clearInterval(asmTimer);
+  asmTimer=setInterval(function(){
+    t--;
+    $('aTime').textContent=t;
+    $('aTimerBar').style.width=((t/60)*100)+'%';
+    $('aTimerBar').style.background=t<=10?'#ff0055':t<=30?'#f59e0b':'#00f2ff';
+    if(t<=0){clearInterval(asmTimer);endAsm();}
+  },1000);
+};
+
+function loadAsm(){
+  var q=ASM_QS[asmIdx];
+  $('aNum').textContent=asmIdx+1;
+  $('aCoins').textContent=asmCoins;
+  $('aIcon').textContent=q.icon;
+  $('aTitle').textContent=q.title;
+  $('aText').textContent=q.q;
+  asmSel=null;
+  $('aFeedback').className='feedback'; $('aFeedback').textContent='';
+  $('aBtn').disabled=true; $('aBtn').style.display='';
+  $('aNext').style.display='none';
+  var opts=$('aOpts'); opts.innerHTML='';
+  shuffle(q.opts.map(function(o,i){return {t:o,i:i};})).forEach(function(o){
+    var b=document.createElement('button');
+    b.style.cssText='padding:11px;background:#1e293b;border:1px solid #334155;border-radius:8px;color:#e2e8f0;cursor:pointer;font-size:13px;text-align:left';
+    b.textContent=o.t;
+    b.addEventListener('click',function(){
+      if(asmSel!==null) return;
+      asmSel=o.i;
+      opts.querySelectorAll('button').forEach(function(btn){btn.style.borderColor='#334155';});
+      b.style.borderColor='#00f2ff'; b.style.background='#1e3a5f';
+      $('aBtn').disabled=false;
+    });
+    opts.appendChild(b);
+  });
+}
+
+window.checkAsm = function(){
+  if(asmSel===null) return;
+  var q=ASM_QS[asmIdx];
+  var ok=asmSel===q.cor;
+  if(ok){
+    asmCorr++; asmCoins+=q.coins;
+    $('aFeedback').className='feedback ok';
+    $('aFeedback').textContent='✅ Correcto! +'+q.coins+' 💎 — '+q.exp;
+  } else {
+    $('aFeedback').className='feedback er';
+    $('aFeedback').textContent='❌ Incorrecto. '+q.exp;
+  }
+  $('aCoins').textContent=asmCoins;
+  $('aBtn').style.display='none'; $('aNext').style.display='';
+};
+
+window.nextAsm = function(){
+  asmIdx++;
+  if(asmIdx>=ASM_QS.length) endAsm();
+  else loadAsm();
+};
+
+function endAsm(){
+  clearInterval(asmTimer);
+  GS.coins+=asmCoins;
+  $('arCorr').textContent=asmCorr+'/'+ASM_QS.length;
+  $('arCoins').textContent=asmCoins+' 💎';
+  $('aResult').style.display='block';
+  updateStats(); saveSess();
+  notify('Ensamblaje completado! +'+asmCoins+' 💎','ok');
+}
+
+// ===== MATCHING =====
+var matchTimer=null, matchSel=null, matchCorr=0;
+
+window.startMatch = function(){
+  matchSel=null; matchCorr=0;
+  document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
+  $('secMatch').classList.add('active');
+  $('mCorr').textContent=0;
+  $('mFeedback').className='feedback'; $('mFeedback').textContent='';
+  var pairs=shuffle([...MATCH_QS]);
+  var terms=shuffle(pairs.map(function(p){return p.t;}));
+  var defs=shuffle(pairs.map(function(p){return p.d;}));
+  var tc=$('matchTerms'); tc.innerHTML='';
+  var dc=$('matchDefs'); dc.innerHTML='';
+  terms.forEach(function(t){
+    var b=document.createElement('button');
+    b.style.cssText='display:block;width:100%;padding:10px;background:#1e293b;border:1px solid #334155;border-radius:8px;color:#e2e8f0;cursor:pointer;font-size:13px;margin-bottom:8px;text-align:left';
+    b.textContent=t; b.dataset.term=t;
+    b.addEventListener('click',function(){
+      tc.querySelectorAll('button').forEach(function(x){x.style.borderColor='#334155';x.style.background='#1e293b';});
+      if(b.classList.contains('matched')) return;
+      b.style.borderColor='#00f2ff'; b.style.background='#1e3a5f';
+      matchSel=t;
+    });
+    tc.appendChild(b);
+  });
+  defs.forEach(function(d){
+    var b=document.createElement('button');
+    b.style.cssText='display:block;width:100%;padding:10px;background:#1e293b;border:1px solid #334155;border-radius:8px;color:#64748b;cursor:pointer;font-size:12px;margin-bottom:8px;text-align:left';
+    b.textContent=d; b.dataset.def=d;
+    b.addEventListener('click',function(){
+      if(b.classList.contains('matched')) return;
+      if(!matchSel){notify('Selecciona primero un término','in');return;}
+      var pair=MATCH_QS.find(function(p){return p.t===matchSel;});
+      if(pair&&pair.d===d){
+        matchCorr++;
+        b.style.borderColor='#00ff9d'; b.style.background='rgba(0,255,157,.1)'; b.style.color='#00ff9d'; b.classList.add('matched');
+        var tb=tc.querySelector('[data-term="'+matchSel+'"]');
+        if(tb){tb.style.borderColor='#00ff9d';tb.style.background='rgba(0,255,157,.1)';tb.style.color='#00ff9d';tb.classList.add('matched');}
+        $('mCorr').textContent=matchCorr;
+        $('mFeedback').className='feedback ok';
+        $('mFeedback').textContent='✅ ¡Correcto!';
+        if(matchCorr>=MATCH_QS.length){
+          clearInterval(matchTimer);
+          var coins=matchCorr*10;GS.coins+=coins;
+          updateStats();saveSess();
+          notify('¡Relacionar completado! +'+coins+' 💎','ok');
+          setTimeout(backToLevels,2000);
+        }
+      } else {
+        $('mFeedback').className='feedback er';
+        $('mFeedback').textContent='❌ Incorrecto, prueba de nuevo';
+      }
+      matchSel=null;
+      tc.querySelectorAll('button:not(.matched)').forEach(function(x){x.style.borderColor='#334155';x.style.background='#1e293b';});
+    });
+    dc.appendChild(b);
+  });
+  var t=90; $('mTime').textContent=t; $('mTimerBar').style.width='100%';
+  if(matchTimer) clearInterval(matchTimer);
+  matchTimer=setInterval(function(){
+    t--;$('mTime').textContent=t;
+    $('mTimerBar').style.width=((t/90)*100)+'%';
+    $('mTimerBar').style.background=t<=20?'#ff0055':t<=40?'#f59e0b':'#00f2ff';
+    if(t<=0){clearInterval(matchTimer);notify('¡Se acabó el tiempo!','er');setTimeout(backToLevels,2000);}
+  },1000);
+};
+
+window.startCable = function(){
+  notify('Cableado RJ45 próximamente','in');
+};
+
+// ===== INIT =====
+window.onload = function(){
+  // Mostrar login siempre primero
+  $('login').style.display='flex';
+  $('game').style.display='none';
+  // Intentar sesión guardada
+  try {
+    if(loadSess()) startGame(CU);
+  } catch(e) {
+    console.warn('Sesión no restaurable:', e);
+  }
+};
+</script>
+</body>
+</html>
