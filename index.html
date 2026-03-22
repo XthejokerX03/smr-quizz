@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMR Quiz - Cyberpunk Edition</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+</head>
+<body>
+<div class="mx-bg" id="mxBg"></div>
+<button type="button" class="a11y-btn" onclick="toggleA11y()" title="Accesibilidad">&#9881;</button>
+<div id="a11yMenu">
+  <h3>Accesibilidad</h3>
+  <button type="button" class="a11y-it" onclick="toggleHC()">&#127763; Alto contraste</button>
+  <button type="button" class="a11y-it" onclick="chgFont(1)">&#128269; Aumentar texto</button>
+  <button type="button" class="a11y-it" onclick="chgFont(-1)">&#128270; Reducir texto</button>
+  <button type="button" class="a11y-it" onclick="toggleDys()">&#128218; Fuente dislexia</button>
+  <button type="button" class="a11y-it" onclick="toggleMx()">&#127783; Lluvia Matrix</button>
+  <button type="button" class="a11y-it" onclick="toggleA11y()" style="background:rgba(255,0,85,.12);color:var(--err)">&#10005; Cerrar</button>
+</div>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="lbox">
+    <div class="llogo">
+      <span class="llogo-ic">&#128187;</span>
+      <h1>SMR Quiz</h1>
+      <p>Sistemas Microinformaticos y Redes</p>
+    </div>
+    <div class="ltabs">
+      <button type="button" class="ltab on" onclick="showTab('login',this)">INICIAR SESION</button>
+      <button type="button" class="ltab" onclick="showTab('reg',this)">REGISTRARSE</button>
+    </div>
+    <div id="fLogin" class="lform on">
+      <div class="fg"><label>USUARIO O EMAIL</label><input type="text" id="lUser" class="fi" placeholder="Tu usuario o email" autocomplete="username"></div>
+      <div class="ferr" id="lErr"></div>
+      <div class="fg"><label>CONTRASENA</label><div class="pw"><input type="password" id="lPass" class="fi" placeholder="Tu contrasena" autocomplete="current-password"><button type="button" class="peye" onclick="togglePw('lPass',this)"><i class="fas fa-eye"></i></button></div></div>
+      <div class="ferr" id="lPassErr"></div>
+      <button type="button" class="btn-main" onclick="doLogin()">ACCEDER AL SISTEMA</button>
+      <div class="lfooter">Sin cuenta? <a onclick="showTab('reg',document.querySelectorAll('.ltab')[1])">Registrate aqui</a></div>
+    </div>
+    <div id="fReg" class="lform">
+      <div class="fg"><label>NOMBRE COMPLETO</label><input type="text" id="rName" class="fi" placeholder="Tu nombre completo" autocomplete="name"></div>
+      <div class="ferr" id="rNameErr"></div>
+      <div class="fg"><label>USUARIO</label><input type="text" id="rUser" class="fi" placeholder="Nombre de usuario" autocomplete="username"></div>
+      <div class="ferr" id="rUserErr"></div>
+      <div class="fg"><label>EMAIL</label><input type="email" id="rEmail" class="fi" placeholder="tu@email.com" autocomplete="email"></div>
+      <div class="ferr" id="rEmailErr"></div>
+      <div class="fg"><label>CONTRASENA</label><div class="pw"><input type="password" id="rPass" class="fi" placeholder="Minimo 6 caracteres" autocomplete="new-password"><button type="button" class="peye" onclick="togglePw('rPass',this)"><i class="fas fa-eye"></i></button></div></div>
+      <div class="ferr" id="rPassErr"></div>
+      <div class="fg"><label>CONFIRMAR CONTRASENA</label><div class="pw"><input type="password" id="rPass2" class="fi" placeholder="Repite la contrasena" autocomplete="new-password"><button type="button" class="peye" onclick="togglePw('rPass2',this)"><i class="fas fa-eye"></i></button></div></div>
+      <div class="ferr" id="rPass2Err"></div>
+      <button type="button" class="btn-main" onclick="doReg()">CREAR CUENTA</button>
+      <div class="lfooter">Ya tienes cuenta? <a onclick="showTab('login',document.querySelectorAll('.ltab')[0])">Inicia sesion</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="game">
+  <div class="sidebar">
+    <div class="cu">
+      <div class="uav" id="uAv">?</div>
+      <div class="uinfo"><div class="uname" id="uName">Usuario</div><div class="ulvl" id="uLvl">Novato</div></div>
+      <button type="button" class="btn-out" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i></button>
+    </div>
+    <div class="stitle">MI AVATAR</div>
+    <div class="av-wrap">
+      <div class="av-b" id="avB">&#129470;</div>
+      <div class="av-h" id="avH">&#129302;</div>
+      <div class="av-hat" id="avHat"></div>
+      <div class="av-gl" id="avGl"></div>
+      <div class="av-it" id="avIt"></div>
+    </div>
+    <div class="av-stats">
+      <div class="avs"><span class="avsl">Nivel:</span><span class="avsv" id="avLvl">Novato</span></div>
+      <div class="avs"><span class="avsl">Puntos:</span><span class="avsv" id="avPts">0</span></div>
+      <div class="avs"><span class="avsl">Monedas:</span><span class="avsv" id="avCoins">0</span></div>
+      <div class="avs"><span class="avsl">Progreso:</span><span class="avsv" id="avProg">0%</span></div>
+    </div>
+    <button type="button" class="btn-cust" onclick="showAvatar()">PERSONALIZAR AVATAR</button>
+  </div>
+  <div class="main">
+    <div class="hdr">
+      <div class="hdr-in">
+        <div class="hdr-l"><div class="hdr-ic">&#128187;</div><div><h1>SMR Quiz</h1><p>Sistemas Microinformaticos y Redes</p></div></div>
+        <div class="stats-row">
+          <div class="stb"><div class="stbl">PUNTOS</div><div class="stbv" id="stPts">0</div></div>
+          <div class="stb"><div class="stbl">NIVELES</div><div class="stbv" id="stLvls">0/36</div></div>
+          <div class="stb"><div class="stbl">MONEDAS</div><div class="stbv" id="stCoins">0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav">
+      <button type="button" class="ntab on" onclick="showMain('levels',this)">&#128218; NIVELES</button>
+      <button type="button" class="ntab" onclick="showMain('mini',this)">&#127918; MINIJUEGOS</button>
+      <button type="button" class="ntab" onclick="showAvatar()">&#128100; AVATAR</button>
+    </div>
+    <div id="sLevels" class="sec on">
+      <div class="ytabs">
+        <button type="button" class="ytab on" onclick="chgYear('primero',this)">&#128218; Primer Anio</button>
+        <button type="button" class="ytab" onclick="chgYear('segundo',this)">&#127891; Segundo Anio</button>
+      </div>
+      <div id="lvlCont"></div>
+    </div>
+    <div id="sMini" class="sec">
+      <div class="mg-hdr"><h2>&#127918; MINIJUEGOS &#127918;</h2><p>Gana monedas con desafios especiales</p></div>
+      <div class="mg-grid">
+        <div class="mgcard" onclick="startAsm()"><span class="mgic">&#128295;</span><h3>ENSAMBLAJE</h3><p>Identifica componentes y herramientas de hardware.</p><div class="mg-feats"><div class="mg-feat"><i class="fas fa-clock"></i>60 segundos por partida</div><div class="mg-feat"><i class="fas fa-question-circle"></i>5 preguntas con imagenes</div></div><div class="mg-rew">+20-60 &#128142;</div><button type="button" class="btn-mg">JUGAR</button></div>
+        <div class="mgcard" onclick="startMatch()"><span class="mgic">&#128279;</span><h3>RELACIONAR</h3><p>Empareja terminos con sus definiciones.</p><div class="mg-feats"><div class="mg-feat"><i class="fas fa-puzzle-piece"></i>Seleccion por clics</div><div class="mg-feat"><i class="fas fa-brain"></i>Vocabulario tecnico SMR</div></div><div class="mg-rew">+15-50 &#128142;</div><button type="button" class="btn-mg">JUGAR</button></div>
+        <div class="mgcard" onclick="startCable()"><span class="mgic">&#128268;</span><h3>CABLEADO RJ45</h3><p>Ordena cables segun T568A y T568B.</p><div class="mg-feats"><div class="mg-feat"><i class="fas fa-network-wired"></i>Estandares T568A/B</div><div class="mg-feat"><i class="fas fa-award"></i>Precision requerida</div></div><div class="mg-rew">+15-45 &#128142;</div><button type="button" class="btn-mg">JUGAR</button></div>
+      </div>
+    </div>
+    <div id="sQuiz" class="sec"><div class="qbox-wrap">
+      <div class="qhdr"><div class="qcount" id="qCount">Pregunta 1/10</div><div class="qscore">+<span id="qPts">0</span> pts</div></div>
+      <div class="trow"><span style="font-size:16px">&#9203;</span><div class="tnum" id="tNum">25</div><div class="tbar"><div class="tprog" id="tProg"></div></div></div>
+      <div class="qtext-box"><div class="qtxt" id="qTxt"></div><input type="text" id="aInp" class="ainp" placeholder="Escribe tu respuesta..." autocomplete="off"></div>
+      <div class="fb" id="qFb"></div>
+      <div class="brow"><button type="button" class="btn-b btn-back" onclick="goBack()">&#8592; Volver</button><button type="button" class="btn-b btn-sub" onclick="checkA()">Verificar</button><button type="button" class="btn-b btn-nxt" id="bNxt" onclick="nextQ()">Siguiente &#8594;</button></div>
+      <div class="comp" id="compScr"><div class="comp-ic">&#127942;</div><div class="comp-ti">Nivel Completado!</div><div class="comp-stats"><div class="comp-stat">Correctas: <strong id="cCorr">0/10</strong></div><div class="comp-stat">Puntos: <strong id="cPts">0</strong></div><div class="comp-stat">Precision: <strong id="cAcc">0%</strong></div><div class="comp-stat">Tiempo medio: <strong id="cTime">0s</strong></div></div><button type="button" class="btn-play" onclick="goBack()">Volver al Menu</button></div>
+    </div></div>
+    <div id="sAsm" class="sec"><div class="asm-wrap">
+      <div class="asm-hdr"><h2>ENSAMBLAJE INTELIGENTE</h2><p style="color:#64748b;font-size:12px">Identifica componentes y herramientas</p><div class="pbar"><div class="prog" id="asmPg"></div></div></div>
+      <div class="astats"><div class="ast"><div class="astl">PREGUNTA</div><div class="astv" id="asmQ">1/5</div></div><div class="ast"><div class="astl">PUNTOS</div><div class="astv" id="asmSc">0</div></div><div class="ast"><div class="astl">TIEMPO</div><div class="astv" id="asmTm">60</div></div><div class="ast"><div class="astl">MONEDAS</div><div class="astv" id="asmCo">0</div></div></div>
+      <div class="ctag" id="asmCat">-</div><div class="hint-b" id="asmHint">-</div>
+      <div class="asm-grid"><div class="asm-img"><div class="asm-big" id="asmIc">-</div><h3 id="asmTi">-</h3><p id="asmDe">-</p></div><div class="aopts" id="asmOpts"></div></div>
+      <div class="afb" id="asmFb"></div><div class="exp-b" id="expB"><div class="exp-ti">&#128161; EXPLICACION</div><div class="exp-tx" id="expTx"></div></div>
+      <div class="actrl"><button type="button" class="btn-b btn-sub" id="asmSub" onclick="subAsm()" disabled>CONFIRMAR</button><button type="button" class="btn-b btn-nxt" id="asmNxt" style="display:none" onclick="nxtAsm()">SIGUIENTE</button></div>
+    </div></div>
+    <div id="sAsmRes" class="sec" style="display:none"><div class="comp on" style="display:block"><div class="comp-ic">&#128295;</div><div class="comp-ti">ENSAMBLAJE OK!</div><div class="comp-stats"><div class="comp-stat">Correctas: <strong id="arCr">-</strong></div><div class="comp-stat">Puntos: <strong id="arSc">-</strong></div><div class="comp-stat">Monedas: <strong id="arCo">-</strong></div><div class="comp-stat">Precision: <strong id="arAc">-</strong></div></div><div style="display:flex;gap:12px;justify-content:center;margin-top:16px"><button type="button" class="btn-b btn-sub" onclick="startAsm()">REPETIR</button><button type="button" class="btn-b btn-nxt on" onclick="goBack()">MENU</button></div></div></div>
+    <div id="sMatch" class="sec"><div class="mat-wrap">
+      <div class="asm-hdr"><h2 style="color:var(--c2)">RELACIONA CONCEPTOS</h2><p style="color:#64748b;font-size:12px">Clic en termino y luego en su definicion</p><div class="pbar"><div class="prog" id="matPg"></div></div></div>
+      <div class="astats"><div class="ast"><div class="astl">ACIERTOS</div><div class="astv" id="matCr">0/5</div></div><div class="ast"><div class="astl">PUNTOS</div><div class="astv" id="matSc">0</div></div><div class="ast"><div class="astl">TIEMPO</div><div class="astv" id="matTm">90</div></div><div class="ast"><div class="astl">MONEDAS</div><div class="astv" id="matCo">0</div></div></div>
+      <div class="mat-grid" id="matGrid"></div>
+      <div style="text-align:center;margin-top:14px"><button type="button" class="btn-b btn-back" onclick="goBack()">&#8592; Volver</button></div>
+    </div></div>
+    <div id="sCable" class="sec"><div class="asm-wrap">
+      <div class="asm-hdr"><h2>CABLEADO RJ45</h2><p style="color:#64748b;font-size:12px">Ordena cables segun T568A y T568B</p></div>
+      <div class="astats"><div class="ast"><div class="astl">PREGUNTA</div><div class="astv" id="cbQ">1/4</div></div><div class="ast"><div class="astl">PUNTOS</div><div class="astv" id="cbSc">0</div></div><div class="ast"><div class="astl">TIEMPO</div><div class="astv" id="cbTm">120</div></div><div class="ast"><div class="astl">MONEDAS</div><div class="astv" id="cbCo">0</div></div></div>
+      <div id="cbCont"></div>
+      <div style="display:flex;justify-content:center;gap:12px;margin-top:16px"><button type="button" class="btn-b btn-back" onclick="goBack()">&#8592; Volver</button><button type="button" class="btn-b btn-sub" onclick="checkCbl()">Verificar</button><button type="button" class="btn-b btn-nxt" id="cbNxt" style="display:none" onclick="nxtCbl()">Siguiente</button></div>
+    </div></div>
+    <div id="sCableRes" class="sec" style="display:none"><div class="comp on" style="display:block"><div class="comp-ic">&#128268;</div><div class="comp-ti">CABLEADO OK!</div><div class="comp-stats"><div class="comp-stat">Puntos: <strong id="crSc">-</strong></div><div class="comp-stat">Monedas: <strong id="crCo">-</strong></div><div class="comp-stat">Tiempo: <strong id="crTm">-</strong></div></div><div style="display:flex;gap:12px;justify-content:center;margin-top:16px"><button type="button" class="btn-b btn-sub" onclick="startCable()">REPETIR</button><button type="button" class="btn-b btn-nxt on" onclick="goBack()">MENU</button></div></div></div>
+    <div id="sAvatar" class="sec"><div class="qbox-wrap">
+      <h2 style="text-align:center;color:var(--c2);font-family:'Orbitron',sans-serif;margin-bottom:20px;font-size:20px">Personaliza tu Avatar</h2>
+      <div class="avs-wrap">
+        <div style="text-align:center">
+          <div class="av-wrap" style="margin:0 auto 14px"><div class="av-b" id="avBF">&#129470;</div><div class="av-h" id="avHF">&#129302;</div><div class="av-hat" id="avHatF"></div><div class="av-gl" id="avGlF"></div><div class="av-it" id="avItF"></div></div>
+          <div class="coins-b">&#128142; <span id="avCS">0</span></div>
+        </div>
+        <div style="flex:1;min-width:240px"><h3 style="color:#e2e8f0;margin-bottom:14px;font-family:'Orbitron',sans-serif;font-size:13px">Tienda de Accesorios</h3><div class="shop-grid" id="shopG"></div></div>
+      </div>
+      <button type="button" class="btn-play" onclick="goBack()" style="margin-top:20px">Volver</button>
+    </div></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modMini" class="modal">
+  <div class="modal-in">
+    <div class="modal-ti">&#127918; DESAFIO EXTREMO</div>
+    <div class="countdown" id="modTm">60</div>
+    <div id="modCont">
+      <div class="mg-qb"><div style="color:var(--c2);font-size:12px;margin-bottom:7px">Pregunta <span id="modQN">1</span>/5</div><div style="color:#e2e8f0;font-size:16px" id="modQTx"></div></div>
+      <div class="mgopts" id="modOpts"></div>
+      <div style="text-align:center;margin-top:16px"><button type="button" class="btn-b btn-sub" onclick="subMod()" id="modSub">Confirmar</button></div>
+    </div>
+    <div id="modRes" style="display:none;text-align:center">
+      <div class="comp-ic">&#127942;</div><div class="comp-ti" id="modReTi"></div>
+      <div class="comp-stats"><div class="comp-stat">Correctas: <strong id="modCr">-</strong></div><div class="comp-stat">Monedas: <strong id="modCo">-</strong></div><div class="comp-stat">Tiempo: <strong id="modTi">-</strong></div></div>
+      <button type="button" class="btn-play" onclick="closeMod()" style="margin-top:14px">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHATBOT -->
+<button type="button" class="cb-btn" id="cbBtn" onclick="toggleCB()"><i class="fas fa-robot"></i></button>
+<div class="cb-win" id="cbWin">
+  <div class="cb-hdr"><div class="cb-av"><i class="fas fa-robot"></i></div><div><h3>NEXUS-AI</h3><p>Asistente SMR</p></div><button type="button" class="cb-x" onclick="toggleCB()"><i class="fas fa-times"></i></button></div>
+  <div class="cb-msgs" id="cbMsgs">
+    <div class="cb-msg bot"><div class="cb-bub">Hola! Soy <strong style="color:var(--c1)">NEXUS-AI</strong>. Como puedo ayudarte?<div class="cb-qa"><button type="button" class="qa-b" onclick="cbSel('Como jugar')">&#127918; Jugar</button><button type="button" class="qa-b" onclick="cbSel('Ganar monedas')">&#128142; Monedas</button><button type="button" class="qa-b" onclick="cbSel('Soporte')">&#128295; Soporte</button><button type="button" class="qa-b" onclick="cbSel('Contacto')">&#128100; Contacto</button></div></div></div>
+  </div>
+  <div class="cb-inp-row"><input type="text" class="cb-inp" id="cbInp" placeholder="Escribe..." maxlength="200" onkeydown="if(event.key==='Enter')cbSend()"><button type="button" class="cb-send" onclick="cbSend()">ENVIAR</button></div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
